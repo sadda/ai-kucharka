@@ -111,13 +111,24 @@ class File(ABC):
         if display_name is None:
             display_name = file_name
         self.logger = logger
-        self.tables = []
+        self._tables: list[Table] | None = None
         self._file_name = file_name
         self._display_name = display_name
 
     @property
     def name(self) -> str:
         return self._display_name
+
+    @property
+    def tables(self) -> list[Table]:
+        # Tables are loaded only once and only when needed
+        if self._tables is None:
+            self._tables = self._load_tables()
+        return self._tables
+
+    @abstractmethod
+    def _load_tables(self) -> list[Table]:
+        pass
 
     def get_info(self, keywords: Sequence[str]) -> list[str]:
         keywords_lower = to_lower(remove_whiteshape(keywords))
@@ -136,24 +147,30 @@ class WordFile(File):
             self.logger.warning("Unreadable file", extra={"file": self.name, "type": "unreadable_file"})
             self.file = None
 
-    def load_tables(self) -> None:
+    def _load_tables(self) -> list[Table]:
+        tables = []
         if self.file:
-            for tab in self.file.tables:
-                table = []
-                for row in tab.rows:
-                    # TODO: possibly skip the whole table
-                    try:
-                        row = [cell.text for cell in row.cells]
-                    except ValueError:
-                        continue
-                    if any(r != "" for r in row):
-                        table.append(row)
-                if len(table) > 0:
-                    lens = [len(row) for row in table]
-                    if len(np.unique(lens)) != 1:
-                        max_len = max(lens)
-                        table = [list(x) + [np.nan] * (max_len - len(x)) for x in table]
-                    self.tables.append(Table(table))
+            try:
+                for tab in self.file.tables:
+                    table = []
+                    for row in tab.rows:
+                        # TODO: possibly skip the whole table
+                        try:
+                            row = [cell.text for cell in row.cells]
+                        except ValueError:
+                            continue
+                        if any(r != "" for r in row):
+                            table.append(row)
+                    if len(table) > 0:
+                        lens = [len(row) for row in table]
+                        if len(np.unique(lens)) != 1:
+                            max_len = max(lens)
+                            table = [list(x) + [np.nan] * (max_len - len(x)) for x in table]
+                        tables.append(Table(table))
+            except Exception as e:
+                self.logger.warning("Unreadable file", extra={"file": self.name, "type": "unreadable_file", "exception": str(e)})
+                return []
+        return tables
 
     def close(self) -> None:
         pass
@@ -183,13 +200,14 @@ class ExcelFile(File):
             self.file = None
             self.sheet_names = []
 
-    def load_tables(self) -> None:
+    def _load_tables(self) -> list[Table]:
         if self.file and self.sheet_names:
             try:
                 sheet = self.load_sheet(self.sheet_names[0])
-                self.tables = [Table(sheet)]
+                return [Table(sheet)]
             except Exception as e:
                 self.logger.warning("Unreadable file", extra={"file": self.name, "type": "unreadable_file", "exception": str(e)})
+        return []
 
     def load_sheet(self, sheet_name: str) -> pd.DataFrame:
         """Loads content of a single sheet from the file.
@@ -284,10 +302,8 @@ class Data(ABC):
 
     def extract_information(self) -> None:
         for file in self.files:
-            if not self.use_file(file):
-                continue
-            file.load_tables()
-            self.extract_file_information(file)
+            if self.use_file(file):
+                self.extract_file_information(file)
         self.postprocess_information()
 
     @abstractmethod
