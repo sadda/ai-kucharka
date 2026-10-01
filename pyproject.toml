@@ -32,7 +32,17 @@ dependencies = [
     "python-json-logger",
     "pywin32; sys_platform == 'win32'",
     "tqdm",
-    "xlrd"    
+    "xlrd"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.11",
+]
+docs = [
+    "mkdocs>=1.6,<2.0",
+    "mkdocs-material>=9.0",
 ]
 
 [project.urls]
@@ -54,3 +64,7 @@ indent-style = "space"
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
+
+[tool.pytest.ini_options]
+testpaths = ["processing/tests"]
+addopts = "-rs"
