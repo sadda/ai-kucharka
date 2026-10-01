@@ -1,0 +1,17 @@
+site_name: AI Kuchařka
+repo_url: https://github.com/sadda/ai-kucharka
+repo_name: ai-kucharka
+
+theme:
+  name: "material"
+  features:
+    - navigation.sections
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+nav:
+  - Documentation: index.md
