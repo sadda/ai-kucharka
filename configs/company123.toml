@@ -6,3 +6,4 @@ root_input = "data/Company123"
 root_output = "results/Company123"
 auxiliary_folder = "auxiliary"
 orders_skip = [".DS_Store"]
+replace_source = []
