@@ -111,17 +111,24 @@ class File(ABC):
         if display_name is None:
             display_name = file_name
         self.logger = logger
-        self.tables = []
+        self._tables: list[Table] | None = None
         self._file_name = file_name
         self._display_name = display_name
-
-    @abstractmethod
-    def is_paper(self) -> bool:
-        pass
 
     @property
     def name(self) -> str:
         return self._display_name
+
+    @property
+    def tables(self) -> list[Table]:
+        # Tables are loaded only once and only when needed
+        if self._tables is None:
+            self._tables = self._load_tables()
+        return self._tables
+
+    @abstractmethod
+    def _load_tables(self) -> list[Table]:
+        pass
 
     def get_info(self, keywords: Sequence[str]) -> list[str]:
         keywords_lower = to_lower(remove_whiteshape(keywords))
@@ -140,27 +147,30 @@ class WordFile(File):
             self.logger.warning("Unreadable file", extra={"file": self.name, "type": "unreadable_file"})
             self.file = None
 
-    def load_tables(self) -> None:
+    def _load_tables(self) -> list[Table]:
+        tables = []
         if self.file:
-            for tab in self.file.tables:
-                table = []
-                for row in tab.rows:
-                    # TODO: possibly skip the whole table
-                    try:
-                        row = [cell.text for cell in row.cells]
-                    except ValueError:
-                        continue
-                    if any(r != "" for r in row):
-                        table.append(row)
-                if len(table) > 0:
-                    lens = [len(row) for row in table]
-                    if len(np.unique(lens)) != 1:
-                        max_len = max(lens)
-                        table = [list(x) + [np.nan] * (max_len - len(x)) for x in table]
-                    self.tables.append(Table(table))
-
-    def is_paper(self) -> bool:
-        return False
+            try:
+                for tab in self.file.tables:
+                    table = []
+                    for row in tab.rows:
+                        # TODO: possibly skip the whole table
+                        try:
+                            row = [cell.text for cell in row.cells]
+                        except ValueError:
+                            continue
+                        if any(r != "" for r in row):
+                            table.append(row)
+                    if len(table) > 0:
+                        lens = [len(row) for row in table]
+                        if len(np.unique(lens)) != 1:
+                            max_len = max(lens)
+                            table = [list(x) + [np.nan] * (max_len - len(x)) for x in table]
+                        tables.append(Table(table))
+            except Exception as e:
+                self.logger.warning("Unreadable file", extra={"file": self.name, "type": "unreadable_file", "exception": str(e)})
+                return []
+        return tables
 
     def close(self) -> None:
         pass
@@ -190,13 +200,14 @@ class ExcelFile(File):
             self.file = None
             self.sheet_names = []
 
-    def load_tables(self) -> None:
-        if self.file and self.sheet_names and self.is_paper():
+    def _load_tables(self) -> list[Table]:
+        if self.file and self.sheet_names:
             try:
                 sheet = self.load_sheet(self.sheet_names[0])
-                self.tables = [Table(sheet)]
+                return [Table(sheet)]
             except Exception as e:
                 self.logger.warning("Unreadable file", extra={"file": self.name, "type": "unreadable_file", "exception": str(e)})
+        return []
 
     def load_sheet(self, sheet_name: str) -> pd.DataFrame:
         """Loads content of a single sheet from the file.
@@ -230,6 +241,8 @@ class ExcelFile(File):
 class Data(ABC):
     excel_file_cls: ClassVar[type[ExcelFile]]
     word_file_cls: ClassVar[type[WordFile]]
+    # Attributes which are not pickled (open files and logger handlers)
+    _runtime_attributes: ClassVar[tuple[str, ...]] = ("files", "logger")
 
     def __init__(
         self,
@@ -246,23 +259,13 @@ class Data(ABC):
         self.metadata = pd.DataFrame()
 
     def __getstate__(self) -> dict[str, Any]:
-        return {
-            "root": self.root,
-            "order_name": self.order_name,
-            "file_names": self.file_names,
-            "metadata": self.metadata,
-        }
+        return {k: v for k, v in self.__dict__.items() if k not in self._runtime_attributes}
 
     def __len__(self) -> int:
         return len(self.metadata)
 
     def __setstate__(self, state: dict[str, Any]) -> None:
-        # Restore saved attributes
-        self.root = state["root"]
-        self.order_name = state["order_name"]
-        self.file_names = state["file_names"]
-        self.metadata = state["metadata"]
-
+        self.__dict__.update(state)
         # Initialize runtime-only attributes
         self.files = []
         self.logger = _default_logger
@@ -294,9 +297,21 @@ class Data(ABC):
         self.file_names = [file.name for file in self.files]
         self.metadata = pd.concat((metadata1, metadata2)).reset_index(drop=True)
 
-    @abstractmethod
+    def use_file(self, file: ExcelFile | WordFile) -> bool:
+        return True
+
     def extract_information(self) -> None:
-        """Populate whatever company-specific fields this subclass defines."""
+        for file in self.files:
+            if self.use_file(file):
+                self.extract_file_information(file)
+        self.postprocess_information()
+
+    @abstractmethod
+    def extract_file_information(self, file: ExcelFile | WordFile) -> None:
+        """Extract company-specific information from one file."""
+
+    def postprocess_information(self) -> None:
+        pass
 
     @classmethod
     def load(cls: type[TData], path: str, logger: logging.Logger | None = None) -> TData:

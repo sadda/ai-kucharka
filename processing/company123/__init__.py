@@ -1,5 +1,2 @@
 from .config import ATTRIBUTES
-from .data import (
-    Company123Data,
-    Company123ExcelFile,
-)
+from .data import Company123Data

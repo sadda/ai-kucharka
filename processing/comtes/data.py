@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -166,42 +165,22 @@ class ComtesData(Data):
         self.composition: list[InfoComposition] = []
         self.values_tests: pd.DataFrame = pd.DataFrame()
 
-    def __getstate__(self) -> dict[str, Any]:
-        state = super().__getstate__()
-        state.update(
-            {
-                "tests": self.tests,
-                "material": self.material,
-                "order": self.order,
-                "customer": self.customer,
-                "composition": self.composition,
-                "values_tests": self.values_tests,
-            }
-        )
-        return state
+    def extract_file_information(self, file: ExcelFile | WordFile) -> None:
+        assert isinstance(file, ComtesExcelFile | ComtesWordFile)
+        self.material = self.material + [InfoStr(x, file.name) for x in file.get_material()]
+        self.order = self.order + [InfoStr(x, file.name) for x in file.get_order()]
+        self.customer = self.customer + [InfoStr(x, file.name) for x in file.get_customer()]
+        self.composition = self.composition + [InfoComposition(x, file.name) for x in file.get_composition()]
 
-    def __setstate__(self, state: dict[str, Any]) -> None:
-        super().__setstate__(state)
-        self.tests = state["tests"]
-        self.material = state["material"]
-        self.order = state["order"]
-        self.customer = state["customer"]
-        self.composition = state["composition"]
-        self.values_tests = state["values_tests"]
+    def use_file(self, file: ExcelFile | WordFile) -> bool:
+        return not isinstance(file, ComtesExcelFile) or file.is_paper()
 
-    def extract_information(self) -> None:
-        for file in self.files:
-            assert isinstance(file, ComtesExcelFile | ComtesWordFile)
-            file.load_tables()
-            self.material = self.material + [InfoStr(x, file.name) for x in file.get_material()]
-            self.order = self.order + [InfoStr(x, file.name) for x in file.get_order()]
-            self.customer = self.customer + [InfoStr(x, file.name) for x in file.get_customer()]
-            self.composition = self.composition + [InfoComposition(x, file.name) for x in file.get_composition()]
+    def postprocess_information(self) -> None:
         self.tests = [self._get_info_from_paper(file) for file in self.files]
         self._extract_test_information()
 
     def _get_info_from_paper(self, file: File) -> TypeTest:
-        if not isinstance(file, ExcelFile) or not file.is_paper() or len(file.sheet_names) == 0:
+        if not isinstance(file, ComtesExcelFile) or not file.is_paper() or len(file.sheet_names) == 0:
             return [], "", ""
 
         sheet = file.load_sheet(file.sheet_names[0])
