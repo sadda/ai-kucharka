@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comtes-processing"
+version = "1.0.0"
+authors = [
+  { name="Lukáš Adam", email="lukas.adam.cr@gmail.com" },
+]
+maintainers = [
+  { name="Lukáš Adam", email="lukas.adam.cr@gmail.com" },
+]
+description = "Library for processing of COMTES data"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = [
+    "data",
+    "processing",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy",
+    "openpyxl",
+    "pandas",
+    "psutil",
+    "python-docx",
+    "python-json-logger",
+    "pywin32; sys_platform == 'win32'",
+    "tqdm",
+    "xlrd"    
+]
+
+[project.urls]
+"Homepage" = "https://github.com/sadda/comtes"
+
+[tool.setuptools.packages.find]
+include = ["processing*"]
+
+[tool.ruff]
+line-length = 250
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501", "F403", "F405"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
