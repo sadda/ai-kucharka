@@ -1,6 +1,7 @@
-auxiliary/
-results*/
+/auxiliary/
+/results/
 log.jsonl
+configs/*.local.toml
 /processing/comtes/resources/
 
 # Byte-compiled / optimized / DLL files

@@ -1,0 +1,9 @@
+# Default configuration for the test company Company123.
+# Copy this file to configs/<name>.local.toml for your own settings (ignored by git).
+
+data_class = "processing.company123.Company123Data"
+root_input = "data/Company123"
+root_output = "results/Company123"
+auxiliary_folder = "auxiliary"
+orders_skip = [".DS_Store"]
+replace_source = []

@@ -1,14 +1,43 @@
+import argparse
+import importlib
 import io
 import os
 import platform
 import sys
-from typing import cast
+import tomllib
+from typing import Any, cast
 
-import numpy as np
 from tqdm import tqdm
 
 from processing import MSOffice, close_logger, filter_warnings, get_logger
-from processing.company123.data import Company123Data as DataClass
+
+DEFAULT_CONFIG = "configs/company123.toml"
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Extract information from order folders.")
+    parser.add_argument("--config", default=DEFAULT_CONFIG, help=f"Path to the TOML config (default: {DEFAULT_CONFIG}).")
+    parser.add_argument("orders", nargs="*", help="Orders to process (default: all orders in root_input).")
+    return parser.parse_args()
+
+
+def load_config(path: str) -> dict[str, Any]:
+    with open(path, "rb") as f:
+        return tomllib.load(f)
+
+
+def load_class(name: str) -> type:
+    module_name, class_name = name.rsplit(".", 1)
+    return getattr(importlib.import_module(module_name), class_name)
+
+
+args = parse_args()
+config = load_config(args.config)
+DataClass = load_class(config["data_class"])
+root_input = config["root_input"]
+root_output = config["root_output"]
+auxiliary_folder = config["auxiliary_folder"]
+orders_skip = config.get("orders_skip", [])
 
 stdout = cast(io.TextIOWrapper, sys.stdout)
 stdout.reconfigure(encoding="utf-8")
@@ -20,13 +49,8 @@ if platform.system() == "Windows":
     MSOffice.kill_all()
     office = MSOffice(logger)
 
-root_input = "data/Company123"
-root_output = "results_company123"
-auxiliary_folder = "auxiliary"
-orders_skip = [".DS_Store", "CN1311055", "ZAK1301031"]
-
 os.makedirs(root_output, exist_ok=True)
-order_names = np.array(os.listdir(root_input))
+order_names = args.orders if args.orders else sorted(os.listdir(root_input))
 
 for order_name in tqdm(order_names):
     print(order_name)
