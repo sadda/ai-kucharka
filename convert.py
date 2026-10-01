@@ -9,7 +9,7 @@ from typing import Any, cast
 
 from tqdm import tqdm
 
-from processing import MSOffice, close_logger, filter_warnings, get_logger
+from ai_kucharka import MSOffice, close_logger, filter_warnings, get_logger
 
 DEFAULT_CONFIG = "configs/company123.toml"
 

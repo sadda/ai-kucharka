@@ -2,7 +2,7 @@
 /results/
 log.jsonl
 configs/*.local.toml
-/processing/comtes/resources/
+/ai_kucharka/comtes/resources/
 /.vscode/
 
 # Byte-compiled / optimized / DLL files

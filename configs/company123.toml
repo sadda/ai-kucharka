@@ -1,7 +1,7 @@
 # Default configuration for the test company Company123.
 # Copy this file to configs/<name>.local.toml for your own settings (ignored by git).
 
-data_class = "processing.company123.Company123Data"
+data_class = "ai_kucharka.company123.Company123Data"
 root_input = "data/Company123"
 root_output = "results/Company123"
 auxiliary_folder = "auxiliary"
