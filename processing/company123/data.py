@@ -1,6 +1,5 @@
 import logging
 import os
-from typing import Any
 
 from ..core.data import Data, ExcelFile, InfoStr, WordFile
 from .config import ATTRIBUTES
@@ -18,15 +17,6 @@ class Company123Data(Data):
     def __init__(self, root: str, order_name: str, logger: logging.Logger) -> None:
         super().__init__(root, order_name, logger)
         self.info: dict[str, list[InfoStr]] = {attribute: [] for attribute in ATTRIBUTES}
-
-    def __getstate__(self) -> dict[str, Any]:
-        state = super().__getstate__()
-        state["info"] = self.info
-        return state
-
-    def __setstate__(self, state: dict[str, Any]) -> None:
-        super().__setstate__(state)
-        self.info = state["info"]
 
     def extract_information(self) -> None:
         for file in self.files:

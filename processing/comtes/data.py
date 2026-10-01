@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -165,29 +164,6 @@ class ComtesData(Data):
         self.customer: list[InfoStr] = []
         self.composition: list[InfoComposition] = []
         self.values_tests: pd.DataFrame = pd.DataFrame()
-
-    def __getstate__(self) -> dict[str, Any]:
-        state = super().__getstate__()
-        state.update(
-            {
-                "tests": self.tests,
-                "material": self.material,
-                "order": self.order,
-                "customer": self.customer,
-                "composition": self.composition,
-                "values_tests": self.values_tests,
-            }
-        )
-        return state
-
-    def __setstate__(self, state: dict[str, Any]) -> None:
-        super().__setstate__(state)
-        self.tests = state["tests"]
-        self.material = state["material"]
-        self.order = state["order"]
-        self.customer = state["customer"]
-        self.composition = state["composition"]
-        self.values_tests = state["values_tests"]
 
     def extract_information(self) -> None:
         for file in self.files:

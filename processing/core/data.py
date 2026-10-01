@@ -230,6 +230,8 @@ class ExcelFile(File):
 class Data(ABC):
     excel_file_cls: ClassVar[type[ExcelFile]]
     word_file_cls: ClassVar[type[WordFile]]
+    # Attributes which are not pickled (open files and logger handlers)
+    _runtime_attributes: ClassVar[tuple[str, ...]] = ("files", "logger")
 
     def __init__(
         self,
@@ -246,23 +248,13 @@ class Data(ABC):
         self.metadata = pd.DataFrame()
 
     def __getstate__(self) -> dict[str, Any]:
-        return {
-            "root": self.root,
-            "order_name": self.order_name,
-            "file_names": self.file_names,
-            "metadata": self.metadata,
-        }
+        return {k: v for k, v in self.__dict__.items() if k not in self._runtime_attributes}
 
     def __len__(self) -> int:
         return len(self.metadata)
 
     def __setstate__(self, state: dict[str, Any]) -> None:
-        # Restore saved attributes
-        self.root = state["root"]
-        self.order_name = state["order_name"]
-        self.file_names = state["file_names"]
-        self.metadata = state["metadata"]
-
+        self.__dict__.update(state)
         # Initialize runtime-only attributes
         self.files = []
         self.logger = _default_logger
