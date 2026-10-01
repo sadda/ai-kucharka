@@ -3,6 +3,7 @@
 log.jsonl
 configs/*.local.toml
 /processing/comtes/resources/
+/.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
