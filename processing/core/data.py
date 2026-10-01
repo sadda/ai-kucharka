@@ -115,10 +115,6 @@ class File(ABC):
         self._file_name = file_name
         self._display_name = display_name
 
-    @abstractmethod
-    def is_paper(self) -> bool:
-        pass
-
     @property
     def name(self) -> str:
         return self._display_name
@@ -159,9 +155,6 @@ class WordFile(File):
                         table = [list(x) + [np.nan] * (max_len - len(x)) for x in table]
                     self.tables.append(Table(table))
 
-    def is_paper(self) -> bool:
-        return False
-
     def close(self) -> None:
         pass
 
@@ -191,7 +184,7 @@ class ExcelFile(File):
             self.sheet_names = []
 
     def load_tables(self) -> None:
-        if self.file and self.sheet_names and self.is_paper():
+        if self.file and self.sheet_names:
             try:
                 sheet = self.load_sheet(self.sheet_names[0])
                 self.tables = [Table(sheet)]

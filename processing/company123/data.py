@@ -5,13 +5,8 @@ from ..core.data import Data, ExcelFile, InfoStr, WordFile
 from .config import ATTRIBUTES
 
 
-class Company123ExcelFile(ExcelFile):
-    def is_paper(self) -> bool:
-        return True
-
-
 class Company123Data(Data):
-    excel_file_cls = Company123ExcelFile
+    excel_file_cls = ExcelFile
     word_file_cls = WordFile
 
     def __init__(self, root: str, order_name: str, logger: logging.Logger) -> None:

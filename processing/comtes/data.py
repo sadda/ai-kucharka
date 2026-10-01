@@ -171,13 +171,16 @@ class ComtesData(Data):
         self.order = self.order + [InfoStr(x, file.name) for x in file.get_order()]
         self.customer = self.customer + [InfoStr(x, file.name) for x in file.get_customer()]
         self.composition = self.composition + [InfoComposition(x, file.name) for x in file.get_composition()]
-        self.tests.append(self._get_info_from_paper(file))
+
+    def use_file(self, file: ExcelFile | WordFile) -> bool:
+        return not isinstance(file, ComtesExcelFile) or file.is_paper()
 
     def postprocess_information(self) -> None:
+        self.tests = [self._get_info_from_paper(file) for file in self.files]
         self._extract_test_information()
 
     def _get_info_from_paper(self, file: File) -> TypeTest:
-        if not isinstance(file, ExcelFile) or not file.is_paper() or len(file.sheet_names) == 0:
+        if not isinstance(file, ComtesExcelFile) or not file.is_paper() or len(file.sheet_names) == 0:
             return [], "", ""
 
         sheet = file.load_sheet(file.sheet_names[0])
