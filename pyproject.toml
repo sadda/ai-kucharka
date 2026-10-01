@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "comtes-processing"
+name = "ai-kucharka"
 version = "1.0.0"
 authors = [
   { name="Lukáš Adam", email="lukas.adam.cr@gmail.com" },
@@ -11,7 +11,7 @@ authors = [
 maintainers = [
   { name="Lukáš Adam", email="lukas.adam.cr@gmail.com" },
 ]
-description = "Library for processing of COMTES data"
+description = "Crawler for extracting information from Word and Excel documents in order folders"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
@@ -46,10 +46,11 @@ docs = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/sadda/comtes"
+"Homepage" = "https://github.com/sadda/ai-kucharka"
+"Documentation" = "https://sadda.github.io/ai-kucharka/"
 
 [tool.setuptools.packages.find]
-include = ["processing*"]
+include = ["ai_kucharka*"]
 
 [tool.ruff]
 line-length = 250
@@ -66,5 +67,5 @@ indent-style = "space"
 "__init__.py" = ["F401"]
 
 [tool.pytest.ini_options]
-testpaths = ["processing/tests"]
+testpaths = ["ai_kucharka/tests"]
 addopts = "-rs"

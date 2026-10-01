@@ -151,13 +151,19 @@ def get_conversion_tests() -> dict[str, str]:
     return conversion_tests
 
 
-def load_eda_composition(folder: str | None = None) -> dict[str, dict[str, str]]:
+def _resource_path(folder: str | None, file_name: str) -> str:
     if folder is None:
         folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resources")
+    path = os.path.join(folder, file_name)
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Resource file {path} not found. The COMTES resources are not part of the repository and must be copied there manually.")
+    return path
 
-    composition1 = pd.read_excel(os.path.join(folder, "Chem_composition_COMTES_materials.xlsx"))
+
+def load_eda_composition(folder: str | None = None) -> dict[str, dict[str, str]]:
+    composition1 = pd.read_excel(_resource_path(folder, "Chem_composition_COMTES_materials.xlsx"))
     composition1["Name"] = composition1["Name"].apply(lambda x: ast.literal_eval(x)["value"])
-    composition2 = pd.read_excel(os.path.join(folder, "Chem_composition_STEELS_EDA.xlsx"))
+    composition2 = pd.read_excel(_resource_path(folder, "Chem_composition_STEELS_EDA.xlsx"))
     composition2["Name"] = composition2["Name"].apply(lambda x: ast.literal_eval(x)["value"])
     composition = pd.concat((composition1, composition2))
     composition = composition.drop_duplicates()
@@ -181,8 +187,7 @@ def load_eda_composition(folder: str | None = None) -> dict[str, dict[str, str]]
 
 def load_material_conversion(path: str | None = None) -> pd.DataFrame:
     if path is None:
-        folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resources")
-        path = os.path.join(folder, "conversion.csv")
+        path = _resource_path(None, "conversion.csv")
     return pd.read_csv(path)
 
 

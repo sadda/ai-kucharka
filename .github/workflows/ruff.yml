@@ -18,4 +18,4 @@ jobs:
         run: ruff check .
 
       - name: Ruff format check
-        run: ruff format processing convert.py .github --check
+        run: ruff format ai_kucharka convert.py .github --check

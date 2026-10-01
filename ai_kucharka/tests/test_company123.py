@@ -3,8 +3,8 @@ import os
 
 import pytest
 
-from processing.company123.config import ATTRIBUTES
-from processing.company123.data import Company123Data
+from ai_kucharka.company123.config import ATTRIBUTES
+from ai_kucharka.company123.data import Company123Data
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 ROOT_INPUT = os.path.join(ROOT, "data", "Company123")
