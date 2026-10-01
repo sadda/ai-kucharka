@@ -18,10 +18,9 @@ class Company123Data(Data):
         super().__init__(root, order_name, logger)
         self.info: dict[str, list[InfoStr]] = {attribute: [] for attribute in ATTRIBUTES}
 
-    def extract_information(self) -> None:
-        for file in self.files:
-            if not os.path.basename(file.name).startswith("Zakazka2026"):
-                continue
-            file.load_tables()
-            for attribute in ATTRIBUTES:
-                self.info[attribute] = self.info[attribute] + [InfoStr(x, file.name) for x in file.get_info([attribute])]
+    def use_file(self, file: ExcelFile | WordFile) -> bool:
+        return os.path.basename(file.name).startswith("Zakazka2026")
+
+    def extract_file_information(self, file: ExcelFile | WordFile) -> None:
+        for attribute in ATTRIBUTES:
+            self.info[attribute] = self.info[attribute] + [InfoStr(x, file.name) for x in file.get_info([attribute])]

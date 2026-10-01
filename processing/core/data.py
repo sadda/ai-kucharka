@@ -286,9 +286,23 @@ class Data(ABC):
         self.file_names = [file.name for file in self.files]
         self.metadata = pd.concat((metadata1, metadata2)).reset_index(drop=True)
 
-    @abstractmethod
+    def use_file(self, file: ExcelFile | WordFile) -> bool:
+        return True
+
     def extract_information(self) -> None:
-        """Populate whatever company-specific fields this subclass defines."""
+        for file in self.files:
+            if not self.use_file(file):
+                continue
+            file.load_tables()
+            self.extract_file_information(file)
+        self.postprocess_information()
+
+    @abstractmethod
+    def extract_file_information(self, file: ExcelFile | WordFile) -> None:
+        """Extract company-specific information from one file."""
+
+    def postprocess_information(self) -> None:
+        pass
 
     @classmethod
     def load(cls: type[TData], path: str, logger: logging.Logger | None = None) -> TData:
