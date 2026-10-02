@@ -163,6 +163,7 @@ class CPFWordFile(ComtesWordFile):
 
     def get_cpf_data(self) -> dict:
         return {
+            "source": self.name,
             "header": self.get_cpf_header(),
             "methods": self.get_cpf_methods(),
             "tests": self.get_cpf_tests(),
@@ -179,4 +180,4 @@ class CPFData(ComtesData):
     def extract_file_information(self, file: ExcelFile | WordFile) -> None:
         super().extract_file_information(file)
         if isinstance(file, CPFWordFile) and "_CPF_" in os.path.basename(file.name):
-            self.cpf.append({"source": file.name, **file.get_cpf_data()})
+            self.cpf.append(file.get_cpf_data())
