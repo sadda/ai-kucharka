@@ -27,50 +27,19 @@ header_labels = {
     ],
 }
 
+test_code_heat_number_labels = ["Test code / Heat number", "Označení zkoušky / Číslo tavby"]
+
 
 class CPFWordFile(ComtesWordFile):
     def get_cpf_header(self) -> dict[str, Any]:
-        result = {}
+        result = {key: self.get_info(labels) for key, labels in header_labels.items()}
+        result = {key: values for key, values in result.items() if values}
+
         test_code_heat_number = []
-
-        # Projdeme všechny tabulky ve Wordu
-        for table in self.tables:
-            data = table.table
-
-            for row in data:
-                row = [str(value).strip() for value in row]
-
-                for i, cell in enumerate(row):
-                    normalized_cell = " ".join(cell.split())
-
-                    if normalized_cell in [
-                        "Test code / Heat number",
-                        "Označení zkoušky / Číslo tavby",
-                    ]:
-                        if i + 1 < len(row):
-                            value = row[i + 1].strip()
-
-                            if " / E" in value:
-                                test_code, heat_number = value.split(" / E", 1)
-                                heat_number = "E" + heat_number
-
-                                test_code_heat_number.append(
-                                    {
-                                        "test_code": test_code.strip(),
-                                        "heat_number": heat_number.strip(),
-                                    }
-                                )
-
-                        continue
-
-                    for key, possible_labels in header_labels.items():
-                        if cell in possible_labels:
-                            if i + 1 < len(row):
-                                value = row[i + 1].strip()
-
-                                if value:
-                                    result[key] = value
-
+        for value in self.get_info(test_code_heat_number_labels):
+            if " / E" in value:
+                test_code, heat_number = value.split(" / E", 1)
+                test_code_heat_number.append({"test_code": test_code.strip(), "heat_number": ("E" + heat_number).strip()})
         if test_code_heat_number:
             result["test_code_heat_number"] = test_code_heat_number
 
