@@ -29,6 +29,17 @@ header_labels = {
 
 test_code_heat_number_labels = ["Test code / Heat number", "Označení zkoušky / Číslo tavby"]
 
+# Test tables: index of the header row and required columns (a tuple lists alternative names)
+test_tables = {
+    "tensile": (0, ["Specimen", "Temp.", "d0", "du", "L0", "Lu", "Rp0,2", "Rm", "Ag", "A", "Z"]),
+    "impact": (1, ["Specimen", "B", "W", "Ligament", "Temp.", ("KU2", "KV2"), "Fracture"]),
+}
+
+
+def find_column(header: list[str], column: str | tuple[str, ...]) -> int | None:
+    names = column if isinstance(column, tuple) else (column,)
+    return next((header.index(name) for name in names if name in header), None)
+
 
 class CPFWordFile(ComtesWordFile):
     def get_cpf_header(self) -> dict[str, Any]:
@@ -45,95 +56,22 @@ class CPFWordFile(ComtesWordFile):
 
         return result
 
-    def get_cpf_tests(self) -> dict:
-        tensile = []
-        impact = []
-
+    def get_cpf_tests(self) -> dict[str, list[dict[str, str]]]:
+        tests = {name: [] for name in test_tables}
         for table in self.tables:
-            rows = table.table
-
-            # převedení buněk na text
-            rows = [[str(value).strip() for value in row] for row in rows]
-
-            # -----------------
-            # TENSILE
-            # -----------------
-            header = rows[0] if rows else []
-
-            if all(
-                column in header
-                for column in [
-                    "Specimen",
-                    "Temp.",
-                    "d0",
-                    "du",
-                    "L0",
-                    "Lu",
-                    "Rp0,2",
-                    "Rm",
-                    "Ag",
-                    "A",
-                    "Z",
-                ]
-            ):
-                for row in rows[2:]:
-                    if not row[0]:
-                        continue
-
-                    tensile.append(
-                        {
-                            "specimen": row[0],
-                            "temp": row[1],
-                            "d0": row[2],
-                            "du": row[3],
-                            "L0": row[4],
-                            "Lu": row[5],
-                            "Rp0,2": row[6],
-                            "Rm": row[7],
-                            "Ag": row[8],
-                            "A": row[9],
-                            "Z": row[10],
-                        }
-                    )
-
-            # -----------------
-            # IMPACT / CHARPY
-            # -----------------
-            if len(rows) >= 2:
-                header = rows[1]
-
-                if all(
-                    column in header
-                    for column in [
-                        "Specimen",
-                        "B",
-                        "W",
-                        "Ligament",
-                        "Temp.",
-                        "KU2" if "KU2" in header else "KV2",
-                        "Fracture",
-                    ]
-                ):
-                    for row in rows[3:]:
-                        if not row[0]:
-                            continue
-
-                        impact.append(
-                            {
-                                "specimen": row[0],
-                                "B": row[1],
-                                "W": row[2],
-                                "ligament": row[3],
-                                "temp": row[4],
-                                ("KU2" if "KU2" in header else "KV2"): row[5],
-                                "fracture": row[6],
-                            }
-                        )
-
-        return {
-            "tensile": tensile,
-            "impact": impact,
-        }
+            rows = [[str(value).strip() for value in row] for row in table.table]
+            for name, (header_row, columns) in test_tables.items():
+                if len(rows) <= header_row:
+                    continue
+                header = rows[header_row]
+                idx = [find_column(header, column) for column in columns]
+                if None in idx:
+                    continue
+                # The row below the header contains units
+                for row in rows[header_row + 2 :]:
+                    if row[idx[0]]:
+                        tests[name].append({header[i]: row[i] for i in idx})
+        return tests
 
     def get_cpf_methods(self) -> list[dict[str, str]]:
         methods = []
