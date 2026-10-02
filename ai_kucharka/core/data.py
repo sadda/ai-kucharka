@@ -128,10 +128,11 @@ class Table:
         for column in columns:
             names = column if isinstance(column, tuple) else (column,)
             names = to_lower(collapse_whitespace(remove_whiteshape(list(names))))
-            i = next((header.index(name) for name in names if name in header), None)
-            if i is None:
+            # Index of the first name found in the header
+            found = [header.index(name) for name in names if name in header]
+            if len(found) == 0:
                 return None
-            idx.append(i)
+            idx.append(found[0])
         return idx
 
 
@@ -184,6 +185,26 @@ class WordFile(File):
         except Exception:
             self.logger.warning("Unreadable file", extra={"file": self.name, "type": "unreadable_file"})
             self.file = None
+
+    def get_paragraphs(self) -> list[str]:
+        if self.file is None:
+            return []
+        return [paragraph.text.strip() for paragraph in self.file.paragraphs if paragraph.text.strip()]
+
+    def find_labelled_paragraphs(self, labels: dict[str, Sequence[str]], separator: str = ":") -> list[tuple[str, str]]:
+        # Paragraphs "label: value" in document order as (key, value) for labels matching labels[key]
+        labels_lower = {key: to_lower(collapse_whitespace(remove_whiteshape(values))) for key, values in labels.items()}
+        result = []
+        for text in self.get_paragraphs():
+            if separator not in text:
+                continue
+            label, value = text.split(separator, 1)
+            label = to_lower(collapse_whitespace(remove_whiteshape([label])))[0]
+            for key, values in labels_lower.items():
+                if label in values:
+                    result.append((key, value.strip()))
+                    break
+        return result
 
     def _load_tables(self) -> list[Table]:
         tables = []

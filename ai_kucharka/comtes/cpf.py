@@ -29,6 +29,13 @@ header_labels = {
 
 test_code_heat_number_labels = ["Test code / Heat number", "Označení zkoušky / Číslo tavby"]
 
+# Paragraphs "label: value" describing test methods; a new method starts with its name
+method_labels = {
+    "name": ["Test method name", "Přesný název zkušební metody", "Genaue Benennung der Methode"],
+    "identification": ["Test method identification", "Identifikace zkušební metody", "Identifikation der Methode"],
+    "specimen_type": ["Test specimen type", "Typ zkušebního tělesa", "Art des Probekörpers"],
+}
+
 # Test tables: index of the header row and required columns (a tuple lists alternative names)
 test_tables = {
     "tensile": (0, ["Specimen", "Temp.", "d0", "du", "L0", "Lu", "Rp0,2", "Rm", "Ag", "A", "Z"]),
@@ -59,28 +66,11 @@ class CPFWordFile(ComtesWordFile):
 
     def get_cpf_methods(self) -> list[dict[str, str]]:
         methods = []
-        current_method = None
-
-        for paragraph in self.file.paragraphs:
-            text = paragraph.text.strip()
-
-            if not text:
-                continue
-
-            if text.startswith("Test method name:"):
-                current_method = {
-                    "name": text.split(":", 1)[1].strip(),
-                }
-                methods.append(current_method)
-
-            elif text.startswith("Test method identification:"):
-                if current_method is not None:
-                    current_method["identification"] = text.split(":", 1)[1].strip()
-
-            elif text.startswith("Test specimen type:"):
-                if current_method is not None:
-                    current_method["specimen_type"] = text.split(":", 1)[1].strip()
-
+        for key, value in self.find_labelled_paragraphs(method_labels):
+            if key == "name":
+                methods.append({"name": value})
+            elif methods:
+                methods[-1][key] = value
         return methods
 
     def get_cpf_data(self) -> dict:
