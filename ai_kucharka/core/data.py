@@ -83,6 +83,10 @@ class InfoComposition(Info):
     source: str
 
 
+def to_python_str(x: Any) -> Any:
+    return str(x) if isinstance(x, str) else x
+
+
 class Table:
     def __init__(self, table: ArrayLike) -> None:
 
@@ -105,8 +109,30 @@ class Table:
                 row = row[:1]
             row = [x for x in row if not pd.isnull(x) and x != ""]
             if len(row) > 0:
-                info.append(row[0])
+                info.append(to_python_str(row[0]))
         return info
+
+    def find_rows(self, columns: Sequence[str | tuple[str, ...]], header_row: int, skip_rows: int = 0) -> pd.DataFrame | None:
+        # Columns are found in the header row, skip_rows rows below it are skipped (such as units); a tuple lists alternative column names
+        if header_row >= len(self.table):
+            return None
+        idx = self._find_columns(header_row, columns)
+        if idx is None:
+            return None
+        rows = [[to_python_str(x) for x in row[idx]] for row in self.table[header_row + 1 + skip_rows :] if not pd.isnull(row[idx[0]]) and row[idx[0]] != ""]
+        return pd.DataFrame(rows, columns=self.table[header_row, idx])
+
+    def _find_columns(self, row: int, columns: Sequence[str | tuple[str, ...]]) -> list[int] | None:
+        header = list(self.table_lower[row])
+        idx = []
+        for column in columns:
+            names = column if isinstance(column, tuple) else (column,)
+            names = to_lower(collapse_whitespace(remove_whiteshape(list(names))))
+            i = next((header.index(name) for name in names if name in header), None)
+            if i is None:
+                return None
+            idx.append(i)
+        return idx
 
 
 class File(ABC):
@@ -140,6 +166,14 @@ class File(ABC):
         for table in self.tables:
             info = info + table.find_values_next_to_labels(keywords_lower, adjacent=adjacent)
         return info
+
+    def find_rows(self, *args, **kwargs) -> list[pd.DataFrame]:
+        dfs = []
+        for table in self.tables:
+            df = table.find_rows(*args, **kwargs)
+            if df is not None:
+                dfs.append(df)
+        return dfs
 
 
 class WordFile(File):

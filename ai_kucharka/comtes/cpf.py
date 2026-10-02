@@ -36,11 +36,6 @@ test_tables = {
 }
 
 
-def find_column(header: list[str], column: str | tuple[str, ...]) -> int | None:
-    names = column if isinstance(column, tuple) else (column,)
-    return next((header.index(name) for name in names if name in header), None)
-
-
 class CPFWordFile(ComtesWordFile):
     def get_cpf_header(self) -> dict[str, Any]:
         result = {key: self.find_values_next_to_labels(labels) for key, labels in header_labels.items()}
@@ -57,20 +52,9 @@ class CPFWordFile(ComtesWordFile):
         return result
 
     def get_cpf_tests(self) -> dict[str, list[dict[str, str]]]:
-        tests = {name: [] for name in test_tables}
-        for table in self.tables:
-            rows = [[str(value).strip() for value in row] for row in table.table]
-            for name, (header_row, columns) in test_tables.items():
-                if len(rows) <= header_row:
-                    continue
-                header = rows[header_row]
-                idx = [find_column(header, column) for column in columns]
-                if None in idx:
-                    continue
-                # The row below the header contains units
-                for row in rows[header_row + 2 :]:
-                    if row[idx[0]]:
-                        tests[name].append({header[i]: row[i] for i in idx})
+        tests = {}
+        for name, (header_row, columns) in test_tables.items():
+            tests[name] = [row for df in self.find_rows(columns, header_row=header_row, skip_rows=1) for row in df.to_dict("records")]
         return tests
 
     def get_cpf_methods(self) -> list[dict[str, str]]:
