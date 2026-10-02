@@ -32,11 +32,11 @@ test_code_heat_number_labels = ["Test code / Heat number", "Označení zkoušky 
 
 class CPFWordFile(ComtesWordFile):
     def get_cpf_header(self) -> dict[str, Any]:
-        result = {key: self.get_info(labels) for key, labels in header_labels.items()}
+        result = {key: self.find_values_next_to_labels(labels) for key, labels in header_labels.items()}
         result = {key: values for key, values in result.items() if values}
 
         test_code_heat_number = []
-        for value in self.get_info(test_code_heat_number_labels):
+        for value in self.find_values_next_to_labels(test_code_heat_number_labels):
             if " / E" in value:
                 test_code, heat_number = value.split(" / E", 1)
                 test_code_heat_number.append({"test_code": test_code.strip(), "heat_number": ("E" + heat_number).strip()})

@@ -93,7 +93,7 @@ class Table:
         self.table = remove_whiteshape(table)
         self.table_lower = to_lower(collapse_whitespace(self.table))
 
-    def get_info(self, keywords: Sequence[str], adjacent: bool = True) -> list[str]:
+    def find_values_next_to_labels(self, keywords: Sequence[str], adjacent: bool = True) -> list[str]:
         # adjacent=True: value is the cell right of the keyword; adjacent=False: first non-empty cell right of it
         idx = np.isin(self.table_lower, keywords)
         ii, jj = np.where(idx)
@@ -134,11 +134,11 @@ class File(ABC):
     def _load_tables(self) -> list[Table]:
         pass
 
-    def get_info(self, keywords: Sequence[str], adjacent: bool = True) -> list[str]:
+    def find_values_next_to_labels(self, keywords: Sequence[str], adjacent: bool = True) -> list[str]:
         keywords_lower = to_lower(collapse_whitespace(remove_whiteshape(keywords)))
         info = []
         for table in self.tables:
-            info = info + table.get_info(keywords_lower, adjacent=adjacent)
+            info = info + table.find_values_next_to_labels(keywords_lower, adjacent=adjacent)
         return info
 
 
