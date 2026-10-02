@@ -4,8 +4,7 @@ import logging
 import os
 from typing import Any
 
-from ..core.data import ExcelFile, WordFile
-from .data import ComtesData, ComtesWordFile
+from ..core.data import Data, ExcelFile, WordFile
 
 header_labels = {
     "title": ["Title", "Název"],
@@ -43,7 +42,7 @@ test_tables = {
 }
 
 
-class CPFWordFile(ComtesWordFile):
+class CPFWordFile(WordFile):
     def get_cpf_header(self) -> dict[str, Any]:
         result = {key: self.find_values_next_to_labels(labels) for key, labels in header_labels.items()}
         result = {key: values for key, values in result.items() if values}
@@ -82,14 +81,17 @@ class CPFWordFile(ComtesWordFile):
         }
 
 
-class CPFData(ComtesData):
+class CPFData(Data):
+    excel_file_cls = ExcelFile
     word_file_cls = CPFWordFile
 
     def __init__(self, root: str, order_name: str, logger: logging.Logger) -> None:
         super().__init__(root, order_name, logger)
         self.cpf: list[dict] = []
 
+    def use_file(self, file: ExcelFile | WordFile) -> bool:
+        return isinstance(file, CPFWordFile) and "_CPF_" in os.path.basename(file.name)
+
     def extract_file_information(self, file: ExcelFile | WordFile) -> None:
-        super().extract_file_information(file)
-        if isinstance(file, CPFWordFile) and "_CPF_" in os.path.basename(file.name):
-            self.cpf.append(file.get_cpf_data())
+        assert isinstance(file, CPFWordFile)
+        self.cpf.append(file.get_cpf_data())

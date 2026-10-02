@@ -6,6 +6,7 @@ from .analysis import (
     load_material_conversion,
     process_files,
 )
+from .cpf import CPFData, CPFWordFile
 from .data import (
     ComtesData,
     ComtesExcelFile,
