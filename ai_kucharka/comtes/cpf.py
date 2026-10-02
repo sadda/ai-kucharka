@@ -7,29 +7,29 @@ from typing import Any
 from ..core.data import ExcelFile, WordFile
 from .data import ComtesData, ComtesWordFile
 
+header_labels = {
+    "title": ["Title", "Název"],
+    "order_number": ["Order number", "Číslo objednávky"],
+    "test_code": ["Test code", "Označení zkoušky"],
+    "job_number": ["Job number", "Číslo zakázky"],
+    "material": ["Material", "Materiál"],
+    "heat_number": ["Heat number", "Číslo tavby"],
+    "drawing_number": ["Drawing number", "Číslo výkresu"],
+    "report_number": ["Report number", "Číslo protokolu"],
+    "pages": ["Pages", "Počet stran"],
+    "appendices": ["Appendices", "Počet příloh"],
+    "order_received": ["Order received", "Datum příjmu objednávky"],
+    "test_date": ["Test date", "Datum zkoušky"],
+    "report_date": ["Report date", "Datum vydání protokolu"],
+    "comtes_job_number": [
+        "COMTES FHT job number",
+        "Číslo zakázky COMTES FHT",
+    ],
+}
+
 
 class CPFWordFile(ComtesWordFile):
     def get_cpf_header(self) -> dict[str, Any]:
-        labels = {
-            "title": ["Title", "Název"],
-            "order_number": ["Order number", "Číslo objednávky"],
-            "test_code": ["Test code", "Označení zkoušky"],
-            "job_number": ["Job number", "Číslo zakázky"],
-            "material": ["Material", "Materiál"],
-            "heat_number": ["Heat number", "Číslo tavby"],
-            "drawing_number": ["Drawing number", "Číslo výkresu"],
-            "report_number": ["Report number", "Číslo protokolu"],
-            "pages": ["Pages", "Počet stran"],
-            "appendices": ["Appendices", "Počet příloh"],
-            "order_received": ["Order received", "Datum příjmu objednávky"],
-            "test_date": ["Test date", "Datum zkoušky"],
-            "report_date": ["Report date", "Datum vydání protokolu"],
-            "comtes_job_number": [
-                "COMTES FHT job number",
-                "Číslo zakázky COMTES FHT",
-            ],
-        }
-
         result = {}
         test_code_heat_number = []
 
@@ -63,7 +63,7 @@ class CPFWordFile(ComtesWordFile):
 
                         continue
 
-                    for key, possible_labels in labels.items():
+                    for key, possible_labels in header_labels.items():
                         if cell in possible_labels:
                             if i + 1 < len(row):
                                 value = row[i + 1].strip()
