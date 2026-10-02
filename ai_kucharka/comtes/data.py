@@ -41,15 +41,15 @@ class ComtesFile(File):
 
     def get_material(self) -> list[str]:
         keywords = ["Material", "Materiál"]
-        return self.find_values_next_to_labels(keywords)
+        return self.find_values_next_to_labels(keywords, adjacent=False)
 
     def get_order(self) -> list[str]:
         keywords = ["Číslo zakázky COMTES FHT", "COMTES FHT job number"]
-        return self.find_values_next_to_labels(keywords)
+        return self.find_values_next_to_labels(keywords, adjacent=False)
 
     def get_customer(self) -> list[str]:
         keywords = ["Zákazník", "Odběratel", "Customer"]
-        return self.find_values_next_to_labels(keywords)
+        return self.find_values_next_to_labels(keywords, adjacent=False)
 
     def get_composition(self, min_matches=5) -> list[TypeComposition]:
         compositions = []

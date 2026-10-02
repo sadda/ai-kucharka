@@ -90,7 +90,7 @@ def to_python_str(x: Any) -> Any:
 class Table:
     def __init__(self, table: ArrayLike) -> None:
 
-        table = np.asarray(table)
+        table = np.asarray(table, dtype=object)
         if table.ndim == 1:
             table = table.reshape(1, -1)
 
@@ -98,7 +98,9 @@ class Table:
         self.table_lower = to_lower(collapse_whitespace(self.table))
 
     def find_values_next_to_labels(self, keywords: Sequence[str], adjacent: bool = True) -> list[str]:
-        # adjacent=True: value is the cell right of the keyword; adjacent=False: first non-empty cell right of it
+        # adjacent=True: value is the cell right of the keyword
+        # adjacent=False: value is the first cell right of the keyword which is not NaN (empty Excel cells are NaN)
+        # Empty values are not returned
         idx = np.isin(self.table_lower, keywords)
         ii, jj = np.where(idx)
         info = []
@@ -107,8 +109,8 @@ class Table:
             row = self.table[i, j + 1 :]
             if adjacent:
                 row = row[:1]
-            row = [x for x in row if not pd.isnull(x) and x != ""]
-            if len(row) > 0:
+            row = [x for x in row if not pd.isnull(x)]
+            if len(row) > 0 and row[0] != "":
                 info.append(to_python_str(row[0]))
         return info
 
