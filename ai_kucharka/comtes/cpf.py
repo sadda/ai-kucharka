@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-import platform
 from typing import Any
 
 from ..core.data import ExcelFile, WordFile
@@ -10,27 +9,6 @@ from .data import ComtesData, ComtesWordFile
 
 
 class CPFWordFile(ComtesWordFile):
-
-
-
-    def get_cpf_pages(self) -> int | None:
-        if platform.system() != "Windows":
-            return None
-        import win32com.client
-
-        word = win32com.client.Dispatch("Word.Application")
-        word.Visible = False
-
-        doc = word.Documents.Open(os.path.abspath(self.name))
-        doc.Repaginate()
-
-        pages = doc.ComputeStatistics(2)
-
-        doc.Close(False)
-        word.Quit()
-
-        return pages
-    
     def get_cpf_header(self) -> dict[str, Any]:
         labels = {
             "title": ["Title", "Název"],
@@ -54,7 +32,6 @@ class CPFWordFile(ComtesWordFile):
 
         result = {}
         test_code_heat_number = []
-      
 
         # Projdeme všechny tabulky ve Wordu
         for table in self.tables:
@@ -73,15 +50,16 @@ class CPFWordFile(ComtesWordFile):
                         if i + 1 < len(row):
                             value = row[i + 1].strip()
 
-
                             if " / E" in value:
                                 test_code, heat_number = value.split(" / E", 1)
-                                heat_number = "E" + heat_number    
+                                heat_number = "E" + heat_number
 
-                                test_code_heat_number.append({
-                                    "test_code": test_code.strip(),
-                                    "heat_number": heat_number.strip(),
-                                })
+                                test_code_heat_number.append(
+                                    {
+                                        "test_code": test_code.strip(),
+                                        "heat_number": heat_number.strip(),
+                                    }
+                                )
 
                         continue
 
@@ -96,8 +74,6 @@ class CPFWordFile(ComtesWordFile):
         if test_code_heat_number:
             result["test_code_heat_number"] = test_code_heat_number
 
-        result["pages"] = self.get_cpf_pages()    
-
         return result
 
     def get_cpf_tests(self) -> dict:
@@ -108,10 +84,7 @@ class CPFWordFile(ComtesWordFile):
             rows = table.table
 
             # převedení buněk na text
-            rows = [
-                [str(value).strip() for value in row]
-                for row in rows
-            ]
+            rows = [[str(value).strip() for value in row] for row in rows]
 
             # -----------------
             # TENSILE
@@ -134,24 +107,25 @@ class CPFWordFile(ComtesWordFile):
                     "Z",
                 ]
             ):
-            
                 for row in rows[2:]:
                     if not row[0]:
                         continue
 
-                    tensile.append({
-                        "specimen": row[0],
-                        "temp": row[1],
-                        "d0": row[2],
-                        "du": row[3],
-                        "L0": row[4],
-                        "Lu": row[5],
-                        "Rp0,2": row[6],
-                        "Rm": row[7],
-                        "Ag": row[8],
-                        "A": row[9],
-                        "Z": row[10],
-                    })
+                    tensile.append(
+                        {
+                            "specimen": row[0],
+                            "temp": row[1],
+                            "d0": row[2],
+                            "du": row[3],
+                            "L0": row[4],
+                            "Lu": row[5],
+                            "Rp0,2": row[6],
+                            "Rm": row[7],
+                            "Ag": row[8],
+                            "A": row[9],
+                            "Z": row[10],
+                        }
+                    )
 
             # -----------------
             # IMPACT / CHARPY
@@ -171,41 +145,27 @@ class CPFWordFile(ComtesWordFile):
                         "Fracture",
                     ]
                 ):
-                    
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    
                     for row in rows[3:]:
                         if not row[0]:
                             continue
 
-                        impact.append({
-                            "specimen": row[0],
-                            "B": row[1],
-                            "W": row[2],
-                            "ligament": row[3],
-                            "temp": row[4],
-                            ("KU2" if "KU2" in header else "KV2"): row[5],
-                            "fracture": row[6],
-                        })
+                        impact.append(
+                            {
+                                "specimen": row[0],
+                                "B": row[1],
+                                "W": row[2],
+                                "ligament": row[3],
+                                "temp": row[4],
+                                ("KU2" if "KU2" in header else "KV2"): row[5],
+                                "fracture": row[6],
+                            }
+                        )
 
         return {
             "tensile": tensile,
             "impact": impact,
-    
         }
-    
+
     def get_cpf_methods(self) -> list[dict[str, str]]:
         methods = []
         current_method = None
@@ -231,14 +191,14 @@ class CPFWordFile(ComtesWordFile):
                     current_method["specimen_type"] = text.split(":", 1)[1].strip()
 
         return methods
-        
+
     def get_cpf_data(self) -> dict:
         return {
             "header": self.get_cpf_header(),
             "methods": self.get_cpf_methods(),
             "tests": self.get_cpf_tests(),
         }
-    
+
 
 class CPFData(ComtesData):
     word_file_cls = CPFWordFile
