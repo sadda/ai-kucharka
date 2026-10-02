@@ -4,6 +4,7 @@ log.jsonl
 configs/*.local.toml
 /ai_kucharka/comtes/resources/
 /.vscode/
+/data/CPF/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -107,6 +107,11 @@ def remove_whiteshape(x: np.ndarray | Sequence[str], strip_chars=" :\xa0") -> np
     return np.vectorize(lambda y: y.strip(strip_chars) if isinstance(y, str) else y, otypes=[x_type])(x)
 
 
+def collapse_whitespace(x: np.ndarray | Sequence[str]) -> np.ndarray:
+    x_type = np.array(x).dtype
+    return np.vectorize(lambda y: " ".join(y.split()) if isinstance(y, str) else y, otypes=[x_type])(x)
+
+
 def to_lower(x: np.ndarray | Sequence[str]) -> np.ndarray:
     x_type = np.array(x).dtype
     return np.vectorize(lambda y: y.lower() if isinstance(y, str) else y, otypes=[x_type])(x)
