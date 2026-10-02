@@ -17,6 +17,7 @@ from docx import Document
 from numpy.typing import ArrayLike
 
 from ..utils import (
+    collapse_whitespace,
     find_excel_files,
     find_word_files,
     remove_whiteshape,
@@ -90,16 +91,19 @@ class Table:
             table = table.reshape(1, -1)
 
         self.table = remove_whiteshape(table)
-        self.table_lower = to_lower(self.table)
+        self.table_lower = to_lower(collapse_whitespace(self.table))
 
-    def get_info(self, keywords: Sequence[str]) -> list[str]:
+    def get_info(self, keywords: Sequence[str], adjacent: bool = True) -> list[str]:
+        # adjacent=True: value is the cell right of the keyword; adjacent=False: first non-empty cell right of it
         idx = np.isin(self.table_lower, keywords)
         ii, jj = np.where(idx)
         info = []
         for i, j in zip(ii, jj):
             # TODO: add merged cells
             row = self.table[i, j + 1 :]
-            row = row[~pd.isnull(row)]
+            if adjacent:
+                row = row[:1]
+            row = [x for x in row if not pd.isnull(x) and x != ""]
             if len(row) > 0:
                 info.append(row[0])
         return info
@@ -130,11 +134,11 @@ class File(ABC):
     def _load_tables(self) -> list[Table]:
         pass
 
-    def get_info(self, keywords: Sequence[str]) -> list[str]:
-        keywords_lower = to_lower(remove_whiteshape(keywords))
+    def get_info(self, keywords: Sequence[str], adjacent: bool = True) -> list[str]:
+        keywords_lower = to_lower(collapse_whitespace(remove_whiteshape(keywords)))
         info = []
         for table in self.tables:
-            info = info + table.get_info(keywords_lower)
+            info = info + table.get_info(keywords_lower, adjacent=adjacent)
         return info
 
 
