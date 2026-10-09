@@ -1,0 +1,1351 @@
+from __future__ import annotations
+
+import json
+import re
+import sys
+from pathlib import Path
+from typing import Any
+
+
+# ============================================================
+# EDA CONVERTER 3000
+# COMTES CPF JSON -> EDA JSON
+# ============================================================
+
+
+# ============================================================
+# POVOLENÉ TEST SERIES
+# ============================================================
+#
+# Tohle jsou JEDINÉ typy Test Series, které používáme.
+#
+# ŽÁDNÝ CHARPY.
+# ŽÁDNÉ VLASTNÍ PŘEJMENOVÁNÍ.
+#
+# ============================================================
+
+TEST_SERIES = {
+    "tensile test": {
+        "key": "tensile",
+        "name": "Tensile test",
+    },
+
+    "impact bend test": {
+        "key": "impact",
+        "name": "Impact bend test",
+    },
+
+    "brinell hardness test": {
+        "key": "hardness",
+        "name": "Brinell hardness test",
+    },
+}
+
+
+# ============================================================
+# POMOCNÉ FUNKCE
+# ============================================================
+
+def first(value: Any, default: str = "") -> Any:
+    """
+    Crawler ukládá některé hodnoty jako list.
+
+    Např.:
+        "order_number": ["55/26/C"]
+
+    Vrátíme:
+        "55/26/C"
+    """
+
+    if isinstance(value, list):
+        if not value:
+            return default
+
+        return value[0]
+
+    if value is None:
+        return default
+
+    return value
+
+
+def text(value: Any) -> str:
+    """
+    Bezpečný převod na text.
+    """
+
+    if value is None:
+        return ""
+
+    return str(value)
+
+
+def slug(value: Any) -> str:
+    """
+    Bezpečný fragment pro ID.
+    """
+
+    value = text(value)
+
+    value = value.replace("/", "_")
+    value = value.replace("\\", "_")
+
+    value = re.sub(
+        r"[^A-Za-z0-9_-]+",
+        "_",
+        value,
+    )
+
+    value = re.sub(
+        r"_+",
+        "_",
+        value,
+    )
+
+    return value.strip("_")
+
+
+def number(value: Any) -> Any:
+    """
+    Převádí české desetinné čárky:
+
+        "9,99" -> 9.99
+        "24"   -> 24
+
+    Pokud převod nejde, vrátí původní hodnotu.
+    """
+
+    if value is None:
+        return value
+
+    if isinstance(value, (int, float)):
+        return value
+
+    value = str(value).strip()
+
+    if not value:
+        return value
+
+    normalized = value.replace(",", ".")
+
+    try:
+        result = float(normalized)
+
+    except ValueError:
+        return value
+
+    if result.is_integer():
+        return int(result)
+
+    return result
+
+
+def header_value(
+    header: dict,
+    key: str,
+    default: str = "",
+) -> Any:
+
+    return first(
+        header.get(key),
+        default,
+    )
+
+
+def attribute(
+    property_name: str,
+    value: Any,
+    unit: str | None = None,
+    value_type: str | None = None,
+    valuetype: str | None = None,
+) -> dict:
+    """
+    Vytvoří EDA attribute.
+    """
+
+    result = {
+        "property": property_name,
+        "value": value,
+    }
+
+    if unit is not None:
+        result["unit"] = unit
+
+    if value_type is not None:
+        result["type"] = value_type
+
+    if valuetype is not None:
+        result["valuetype"] = valuetype
+
+    return result
+
+
+# ============================================================
+# ZJIŠTĚNÍ TYPU TESTU
+# ============================================================
+
+def get_test_series_info(
+    method: dict,
+) -> tuple[str, str]:
+
+    method_name = text(
+        method.get("name")
+    ).strip().lower()
+
+    info = TEST_SERIES.get(
+        method_name
+    )
+
+    if info is None:
+
+        raise ValueError(
+            f"Neznámý typ testu: "
+            f"'{method.get('name')}'. "
+            f"Povolené typy jsou: "
+            f"Tensile test, "
+            f"Impact bend test, "
+            f"Brinell hardness test."
+        )
+
+    return (
+        info["key"],
+        info["name"],
+    )
+
+
+# ============================================================
+# LAB ORDER
+# ============================================================
+
+def create_lab_order(
+    record: dict,
+    order_number: str,
+) -> dict:
+
+    header = record.get(
+        "header",
+        {},
+    )
+
+    order_id = slug(
+        order_number
+    )
+
+    lab_order = {
+
+        "_id":
+            f"auto:LabOrder{order_id}",
+
+        "itemid":
+            f"auto:LabOrder{order_id}",
+
+        "type":
+            "generic_order",
+
+        "treetags": [
+            "toplevel",
+            "Lab Orders",
+        ],
+
+        "viewtags": [
+            "_generic",
+        ],
+
+        "name":
+            order_number,
+
+        "attributes": [],
+
+        "link_id":
+            f"cpf_order_{order_number}",
+
+        "visible_":
+            "all",
+
+        "permission_group":
+            "allreadonly",
+
+        "version":
+            1,
+
+        "view_id": [
+            f"auto:cpf_{order_id}_lab_order",
+        ],
+
+        "toplevel_":
+            True,
+
+        "linkval": [
+            f"ts:auto:cpf_{order_id}_lab_order",
+        ],
+
+        "children": [
+            f"auto:LT{order_id}_TestSeries",
+            f"auto:LT{order_id}_AllTests",
+        ],
+    }
+
+    # ========================================================
+    # LAB ORDER ATTRIBUTES
+    # ========================================================
+
+    mappings = [
+
+        (
+            "Lab Order Name",
+            "title",
+        ),
+
+        (
+            "Lab Order ID",
+            "order_number",
+        ),
+
+        (
+            "Report number",
+            "report_number",
+        ),
+
+        (
+            "Appendices",
+            "appendices",
+        ),
+
+        (
+            "Test code",
+            "test_code",
+        ),
+
+        (
+            "Order received",
+            "order_received",
+        ),
+
+        (
+            "Job number",
+            "job_number",
+        ),
+
+        (
+            "Test date",
+            "test_date",
+        ),
+
+        (
+            "Report date",
+            "report_date",
+        ),
+
+        (
+            "Material",
+            "material",
+        ),
+
+        (
+            "Heat number",
+            "heat_number",
+        ),
+
+        (
+            "COMTES job number",
+            "comtes_job_number",
+        ),
+
+        (
+            "Drawing number",
+            "drawing_number",
+        ),
+    ]
+
+    for (
+        eda_name,
+        crawler_name,
+    ) in mappings:
+
+        value = header_value(
+            header,
+            crawler_name,
+        )
+
+        if value == "":
+            continue
+
+        lab_order["attributes"].append(
+
+            attribute(
+                eda_name,
+                text(value),
+                valuetype="string",
+            )
+        )
+
+    # ========================================================
+    # WRITTEN BY
+    # ========================================================
+
+    if header.get("written_by"):
+
+        lab_order["attributes"].append(
+
+            attribute(
+                "Written by",
+                text(
+                    header["written_by"]
+                ),
+                valuetype="string",
+            )
+        )
+
+    # ========================================================
+    # APPROVED BY
+    # ========================================================
+
+    if header.get("approved_by"):
+
+        lab_order["attributes"].append(
+
+            attribute(
+                "Approved by",
+                text(
+                    header["approved_by"]
+                ),
+                valuetype="string",
+            )
+        )
+
+    return lab_order
+
+
+# ============================================================
+# TEST SERIES
+# ============================================================
+
+def create_test_series(
+    order_number: str,
+    method: dict,
+) -> tuple[dict, str]:
+
+    test_key, test_series_name = (
+        get_test_series_info(
+            method
+        )
+    )
+
+    order_id = slug(
+        order_number
+    )
+
+    series_id = slug(
+        test_series_name
+    )
+
+    series_name = (
+        f"{order_number} - "
+        f"{test_series_name}"
+    )
+
+    series = {
+
+        "_id":
+            f"auto:TS{order_id}_{series_id}",
+
+        "itemid":
+            f"auto:TS{order_id}_{series_id}",
+
+        "unique_fields_": [
+            "name",
+        ],
+
+        "link_id": [
+            f"ts:{order_number}",
+        ],
+
+        "pid":
+            order_number,
+
+        "view_id": [
+            series_name,
+            (
+                f"auto:cpf_"
+                f"{order_id}_"
+                f"ts_{test_key}"
+            ),
+        ],
+
+        "name":
+            series_name,
+
+        "treetags": [
+            (
+                f"toplevel/"
+                f"{order_id.replace('_', '-')}/"
+                f"{series_id}"
+            ),
+        ],
+
+        "viewtags": [
+            "_generic",
+        ],
+
+        "permission_group":
+            "allreadonly",
+
+        "attributes": [
+            attribute(
+                "Lab Order",
+                order_number,
+                value_type="dblink",
+            ),
+
+            attribute(
+                "Test Type",
+                test_series_name,
+            ),
+        ],
+
+        "type":
+            "generic_test_series",
+
+        "toplevel_":
+            True,
+
+        "children": [
+            (
+                f"auto:LT"
+                f"{order_id}_"
+                f"{test_key}_Tests"
+            ),
+        ],
+
+        "visible_":
+            "all",
+
+        "version":
+            1,
+
+        "linkval": [
+            f"test:ts:{series_name}",
+        ],
+    }
+
+    # ========================================================
+    # METHOD
+    # ========================================================
+
+    if method.get("name"):
+
+        series["attributes"].append(
+
+            attribute(
+                "Method",
+                text(
+                    method["name"]
+                ),
+            )
+        )
+
+    # ========================================================
+    # METHOD IDENTIFICATION
+    # ========================================================
+
+    if method.get("identification"):
+
+        series["attributes"].append(
+
+            attribute(
+                "Method Identification",
+                text(
+                    method[
+                        "identification"
+                    ]
+                ),
+            )
+        )
+
+    # ========================================================
+    # SPECIMEN TYPE
+    # ========================================================
+
+    if method.get("specimen_type"):
+
+        series["attributes"].append(
+
+            attribute(
+                "Specimen Type",
+                text(
+                    method[
+                        "specimen_type"
+                    ]
+                ),
+            )
+        )
+
+    return (
+        series,
+        test_key,
+    )
+
+
+# ============================================================
+# TEST ATTRIBUTES
+# ============================================================
+
+def get_test_fields(
+    test_key: str,
+) -> list[tuple[str, str, str | None]]:
+
+    # ========================================================
+    # TENSILE TEST
+    # ========================================================
+
+    if test_key == "tensile":
+
+        return [
+
+            (
+                "Original Diameter",
+                "d0",
+                "mm",
+            ),
+
+            (
+                "Final Diameter",
+                "du",
+                "mm",
+            ),
+
+            (
+                "Original Gauge Length",
+                "L0",
+                "mm",
+            ),
+
+            (
+                "Final Gauge Length",
+                "Lu",
+                "mm",
+            ),
+
+            (
+                "Yield Strength 0.2 %",
+                "Rp0,2",
+                "MPa",
+            ),
+
+            (
+                "Tensile Strength",
+                "Rm",
+                "MPa",
+            ),
+
+            (
+                "Uniform Elongation",
+                "Ag",
+                "%",
+            ),
+
+            (
+                "Elongation After Fracture",
+                "A",
+                "%",
+            ),
+
+            (
+                "Reduction Of Area",
+                "Z",
+                "%",
+            ),
+        ]
+
+    # ========================================================
+    # IMPACT BEND TEST
+    # ========================================================
+
+    if test_key == "impact":
+
+        return [
+
+            (
+                "B",
+                "B",
+                "mm",
+            ),
+
+            (
+                "W",
+                "W",
+                "mm",
+            ),
+
+            (
+                "Ligament",
+                "Ligament",
+                "mm",
+            ),
+
+            (
+                "KV2",
+                "KV2",
+                None,
+            ),
+
+            (
+                "Fracture",
+                "Fracture",
+                None,
+            ),
+        ]
+
+    # ========================================================
+    # BRINELL HARDNESS TEST
+    # ========================================================
+
+    if test_key == "hardness":
+
+        return [
+
+            (
+                "Hardness",
+                "Hardness",
+                None,
+            ),
+        ]
+
+    return []
+
+
+# ============================================================
+# TEST
+# ============================================================
+
+def create_test(
+    order_number: str,
+    series_name: str,
+    test_key: str,
+    test_data: dict,
+) -> dict:
+
+    specimen = (
+        text(
+            test_data.get(
+                "Specimen"
+            )
+        )
+        or "Unnamed"
+    )
+
+    order_id = slug(
+        order_number
+    )
+
+    specimen_id = slug(
+        specimen
+    )
+
+    series_id = slug(
+        series_name
+    )
+
+    test = {
+
+        "_id":
+            (
+                f"auto:Test"
+                f"{order_id}_"
+                f"{specimen_id}"
+            ),
+
+        "itemid":
+            (
+                f"auto:Test"
+                f"{order_id}_"
+                f"{specimen_id}"
+            ),
+
+        "unique_fields_": [
+            "name",
+        ],
+
+        # ====================================================
+        # TEST JE NAPOJEN:
+        #
+        # 1. NA LAB ORDER
+        # 2. NA TEST SERIES
+        # ====================================================
+
+        "link_id": [
+
+            f"test:{order_number}",
+
+            f"test:ts:{series_name}",
+        ],
+
+        "pid":
+            order_number,
+
+        "name":
+            specimen,
+
+        "treetags": [
+            (
+                f"toplevel/"
+                f"{order_id.replace('_', '-')}/"
+                f"{series_id}"
+            ),
+        ],
+
+        "viewtags": [
+            "_generic",
+        ],
+
+        "permission_group":
+            "allreadonly",
+
+        "attributes": [
+
+            attribute(
+                "Name",
+                specimen,
+            ),
+        ],
+
+        "type":
+            "generic_test",
+
+        "toplevel_":
+            True,
+
+        "children": [],
+
+        "visible_":
+            "all",
+
+        "version":
+            1,
+
+        "view_id": [
+            (
+                f"auto:cpf_"
+                f"{order_id}_"
+                f"test_{specimen_id}"
+            ),
+        ],
+    }
+
+    # ========================================================
+    # TEST TEMPERATURE
+    # ========================================================
+
+    if test_data.get(
+        "Temp."
+    ) not in (
+        None,
+        "",
+    ):
+
+        test["attributes"].append(
+
+            attribute(
+                "Test Temperature",
+                number(
+                    test_data[
+                        "Temp."
+                    ]
+                ),
+                unit="°C",
+            )
+        )
+
+    # ========================================================
+    # TEST SERIES
+    # ========================================================
+
+    test["attributes"].append(
+
+        attribute(
+            "Test Series",
+            series_name,
+            value_type="dblink",
+        )
+    )
+
+    # ========================================================
+    # VÝSLEDKY
+    # ========================================================
+
+    fields = get_test_fields(
+        test_key
+    )
+
+    for (
+        eda_name,
+        crawler_name,
+        unit,
+    ) in fields:
+
+        value = test_data.get(
+            crawler_name
+        )
+
+        if value in (
+            None,
+            "",
+        ):
+            continue
+
+        test["attributes"].append(
+
+            attribute(
+                eda_name,
+                number(value),
+                unit=unit,
+            )
+        )
+
+    return test
+
+
+# ============================================================
+# SORTOVÁNÍ TESTŮ
+# ============================================================
+
+def specimen_sort_key(
+    test: dict,
+) -> tuple:
+
+    name = text(
+        test.get(
+            "name",
+            "",
+        )
+    )
+
+    # --------------------------------------------------------
+    # Příklad:
+    #
+    # 6827_1_1_L
+    # 6827_1_2_L
+    # 6827_2_1_L
+    #
+    # převedeme na:
+    #
+    # (6827, 1, 1, L)
+    # --------------------------------------------------------
+
+    parts = re.split(
+        r"[_\-\s]+",
+        name,
+    )
+
+    result = []
+
+    for part in parts:
+
+        if part.isdigit():
+
+            result.append(
+                (
+                    0,
+                    int(part),
+                )
+            )
+
+        else:
+
+            result.append(
+                (
+                    1,
+                    part.lower(),
+                )
+            )
+
+    return tuple(
+        result
+    )
+
+
+# ============================================================
+# HLAVNÍ CONVERT
+# ============================================================
+
+def convert(
+    data: list[dict],
+) -> list[dict]:
+
+    if not isinstance(
+        data,
+        list,
+    ):
+
+        raise ValueError(
+            "Input JSON musí obsahovat "
+            "list protokolů."
+        )
+
+    if not data:
+        return []
+
+    # ========================================================
+    # GROUP BY ORDER NUMBER
+    # ========================================================
+
+    grouped: dict[
+        str,
+        list[dict]
+    ] = {}
+
+    for record in data:
+
+        header = record.get(
+            "header",
+            {},
+        )
+
+        order_number = header_value(
+            header,
+            "order_number",
+        )
+
+        if not order_number:
+
+            raise ValueError(
+                "Protokol nemá "
+                "header.order_number."
+            )
+
+        grouped.setdefault(
+            text(order_number),
+            [],
+        ).append(
+            record
+        )
+
+    result = []
+
+    # ========================================================
+    # KAŽDÝ LAB ORDER
+    # ========================================================
+
+    for (
+        order_number,
+        records,
+    ) in grouped.items():
+
+        # ----------------------------------------------------
+        # LAB ORDER
+        # ----------------------------------------------------
+
+        lab_order = create_lab_order(
+            records[0],
+            order_number,
+        )
+
+        result.append(
+            lab_order
+        )
+
+        # ----------------------------------------------------
+        # Series podle názvu
+        # ----------------------------------------------------
+
+        series_objects: dict[
+            str,
+            dict
+        ] = {}
+
+        # ----------------------------------------------------
+        # Testy si nejdříve nasbíráme.
+        #
+        # Důležité kvůli správnému pořadí.
+        # ----------------------------------------------------
+
+        series_tests: dict[
+            str,
+            list[dict]
+        ] = {}
+
+        # ====================================================
+        # PROTOKOLY
+        # ====================================================
+
+        for record in records:
+
+            methods = record.get(
+                "methods",
+                [],
+            )
+
+            tests = record.get(
+                "tests",
+                {},
+            )
+
+            # =================================================
+            # METODY / TEST SERIES
+            # =================================================
+
+            for method in methods:
+
+                (
+                    series,
+                    test_key,
+                ) = create_test_series(
+                    order_number,
+                    method,
+                )
+
+                series_name = (
+                    series["name"]
+                )
+
+                # ---------------------------------------------
+                # Series ještě neexistuje
+                # ---------------------------------------------
+
+                if (
+                    series_name
+                    not in series_objects
+                ):
+
+                    series_objects[
+                        series_name
+                    ] = series
+
+                    series_tests[
+                        series_name
+                    ] = []
+
+                # ---------------------------------------------
+                # Test data
+                # ---------------------------------------------
+
+                test_list = tests.get(
+                    test_key,
+                    [],
+                )
+
+                for test_data in test_list:
+
+                    test = create_test(
+                        order_number,
+                        series_name,
+                        test_key,
+                        test_data,
+                    )
+
+                    series_tests[
+                        series_name
+                    ].append(
+                        test
+                    )
+
+        # ====================================================
+        # SERIES + TESTS
+        # ====================================================
+
+        for (
+            series_name,
+            series,
+        ) in series_objects.items():
+
+            tests_for_series = (
+                series_tests[
+                    series_name
+                ]
+            )
+
+            # ------------------------------------------------
+            # Přirozené pořadí:
+            #
+            # 1_1
+            # 1_2
+            # 2_1
+            # 2_2
+            #
+            # ------------------------------------------------
+
+            tests_for_series.sort(
+                key=specimen_sort_key
+            )
+
+            # ------------------------------------------------
+            # Přidáme Series
+            # ------------------------------------------------
+
+            result.append(
+                series
+            )
+
+            # ------------------------------------------------
+            # Přidáme testy
+            # ------------------------------------------------
+
+            result.extend(
+                tests_for_series
+            )
+
+    return result
+
+
+# ============================================================
+# MAIN
+# ============================================================
+
+def main() -> int:
+
+    if len(sys.argv) != 3:
+
+        print()
+        print(
+            "EDA CONVERTER 3000"
+        )
+        print()
+        print(
+            "Použití:"
+        )
+        print()
+        print(
+            "python EDAConverter3000.py "
+            "INPUT.json OUTPUT.json"
+        )
+        print()
+        print(
+            "Příklad:"
+        )
+        print()
+        print(
+            "python EDAConverter3000.py "
+            "results/cpf/en/55_26_C.json "
+            "results/cpf/en/55_26_C_EDA_EN.json"
+        )
+        print()
+
+        return 2
+
+    input_path = Path(
+        sys.argv[1]
+    )
+
+    output_path = Path(
+        sys.argv[2]
+    )
+
+    # ========================================================
+    # INPUT
+    # ========================================================
+
+    if not input_path.exists():
+
+        print()
+        print(
+            "CHYBA:"
+        )
+        print(
+            f"Soubor neexistuje:"
+        )
+        print(
+            input_path
+        )
+        print()
+
+        return 1
+
+    # ========================================================
+    # LOAD + CONVERT
+    # ========================================================
+
+    try:
+
+        data = json.loads(
+
+            input_path.read_text(
+                encoding="utf-8"
+            )
+        )
+
+        converted = convert(
+            data
+        )
+
+        output_path.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        output_path.write_text(
+
+            json.dumps(
+                converted,
+                ensure_ascii=False,
+                indent=2,
+            ),
+
+            encoding="utf-8",
+        )
+
+    except Exception as error:
+
+        print()
+        print(
+            "================================"
+        )
+        print(
+            " CHYBA PŘI KONVERZI"
+        )
+        print(
+            "================================"
+        )
+        print()
+        print(
+            error
+        )
+        print()
+
+        return 1
+
+    # ========================================================
+    # SUMMARY
+    # ========================================================
+
+    print()
+    print(
+        "======================================"
+    )
+    print(
+        "       EDA CONVERTER 3000"
+    )
+    print(
+        "======================================"
+    )
+    print()
+
+    print(
+        f"INPUT :  {input_path}"
+    )
+
+    print(
+        f"OUTPUT:  {output_path}"
+    )
+
+    print(
+        f"OBJECTS: {len(converted)}"
+    )
+
+    print()
+    print(
+        "Hotovo."
+    )
+    print()
+
+    return 0
+
+
+# ============================================================
+# START
+# ============================================================
+
+if __name__ == "__main__":
+
+    raise SystemExit(
+        main()
+    )

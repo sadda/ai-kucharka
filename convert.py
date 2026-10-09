@@ -11,7 +11,8 @@ from tqdm import tqdm
 
 from ai_kucharka import MSOffice, close_logger, filter_warnings, get_logger
 
-DEFAULT_CONFIG = "configs/company123.toml"
+DEFAULT_CONFIG = "configs/cpf.local.toml" 
+
 
 
 def parse_args() -> argparse.Namespace:
@@ -55,16 +56,37 @@ order_names = args.orders if args.orders else sorted(os.listdir(root_input))
 
 for order_name in tqdm(order_names):
     print(order_name)
+
     if order_name in orders_skip:
         continue
+
     root = f"{root_input}/{order_name}"
-    result_name = f"{root_output}/{order_name}.pkl"
-    if os.path.exists(result_name) and not overwrite:
-        data = DataClass.load(result_name, logger)
-    else:
-        data = DataClass(root, order_name, logger)
-        data.extract_files(output_dir=auxiliary_folder, office=office)
-        data.extract_information()
-        data.save(result_name)
+
+    data = DataClass(root, order_name, logger)
+    data.extract_files(output_dir=auxiliary_folder, office=office)
+
+    for file in data.files:
+        if not data.use_file(file):
+            continue
+
+        data.cpf = []
+
+        data.extract_file_information(file)
+
+    
+
+        header = data.cpf[0]["header"]
+        order_number = header.get("order_number", [order_name])[0]
+
+        language = os.path.splitext(file.name)[0].split("_")[-1].upper()
+
+        result_name = (
+            f"{root_output}/"
+            f"{order_number.replace('/', '_')}_{language}.json"
+        )
+
+        if overwrite or not os.path.exists(result_name):
+            data.save(result_name)
+
     data.close_files()
 close_logger()
