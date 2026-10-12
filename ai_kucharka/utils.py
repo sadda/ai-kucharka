@@ -1,9 +1,13 @@
+import datetime
 import logging
 import os
+import re
 import warnings
 from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
+import pandas as pd
 from pythonjsonlogger import jsonlogger
 
 from .office import convert_office_file
@@ -110,6 +114,41 @@ def remove_whiteshape(x: np.ndarray | Sequence[str], strip_chars=" :\xa0") -> np
 def collapse_whitespace(x: np.ndarray | Sequence[str]) -> np.ndarray:
     x_type = np.array(x).dtype
     return np.vectorize(lambda y: " ".join(y.split()) if isinstance(y, str) else y, otypes=[x_type])(x)
+
+
+def split_unit(label: str) -> tuple[str, str | None]:
+    # "Laser power [W]" -> ("Laser power", "W")
+    label = " ".join(label.split())
+    match = re.fullmatch(r"(.*?)\s*\[([^\]]*)\]", label)
+    if match is None:
+        return label, None
+    return match.group(1).strip(), match.group(2).strip()
+
+
+def parse_number(x: Any) -> Any:
+    # Numeric strings with decimal comma or dot are converted, everything else is returned unchanged
+    if isinstance(x, str) and re.fullmatch(r"[+-]?\d+([.,]\d+)?", x.strip()):
+        value = float(x.strip().replace(",", "."))
+        return int(value) if value.is_integer() else value
+    return x
+
+
+def clean_value(x: Any, empty_values: Sequence[str] = ("", "n/a", "na", "-")) -> Any:
+    # Converts a cell to a JSON-friendly Python value, empty cells become None
+    if x is None or (not isinstance(x, (str, list, tuple)) and pd.isnull(x)):
+        return None
+    if isinstance(x, str):
+        x = " ".join(x.split())
+        return None if x.lower() in empty_values else parse_number(x)
+    if isinstance(x, (pd.Timestamp, datetime.datetime)):
+        return x.date().isoformat() if x.time() == datetime.time() else x.isoformat()
+    if isinstance(x, (datetime.date, datetime.time)):
+        return x.isoformat()
+    if isinstance(x, (np.integer, np.floating)):
+        x = x.item()
+    if isinstance(x, float) and x.is_integer():
+        return int(x)
+    return x
 
 
 def to_lower(x: np.ndarray | Sequence[str]) -> np.ndarray:

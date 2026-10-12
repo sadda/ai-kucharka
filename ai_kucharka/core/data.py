@@ -7,7 +7,7 @@ import pickle
 import re
 import unicodedata
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, ClassVar, TypeVar, cast
 
@@ -17,6 +17,7 @@ from docx import Document
 from numpy.typing import ArrayLike
 
 from ..utils import (
+    clean_value,
     collapse_whitespace,
     find_excel_files,
     find_word_files,
@@ -124,6 +125,21 @@ class Table:
         rows = [[to_python_str(x) for x in row[idx]] for row in self.table[header_row + 1 + skip_rows :] if not pd.isnull(row[idx[0]]) and row[idx[0]] != ""]
         return pd.DataFrame(rows, columns=self.table[header_row, idx])
 
+    def find_block(self, anchors: Sequence[str]) -> pd.DataFrame | None:
+        # Block starts at the first anchor cell and continues down until the first empty cell in the anchor column
+        # Columns span from the anchor column to the last non-empty column of the block; no header is assumed
+        ii, jj = np.where(np.isin(self.table_lower, anchors))
+        if len(ii) == 0:
+            return None
+        i, j = ii[0], jj[0]
+        end = i + 1
+        while end < len(self.table) and not pd.isnull(self.table[end, j]) and self.table[end, j] != "":
+            end += 1
+        block = self.table[i:end, j:]
+        non_empty = [k for k in range(block.shape[1]) if any(not pd.isnull(x) and x != "" for x in block[:, k])]
+        block = block[:, : max(non_empty) + 1]
+        return pd.DataFrame([[to_python_str(x) for x in row] for row in block])
+
     def _find_columns(self, row: int, columns: Sequence[str | tuple[str, ...]]) -> list[int] | None:
         header = list(self.table_lower[row])
         idx = []
@@ -169,6 +185,29 @@ class File(ABC):
         for table in self.tables:
             info = info + table.find_values_next_to_labels(keywords_lower, adjacent=adjacent)
         return info
+
+    def find_blocks(self, anchors: Sequence[str]) -> list[pd.DataFrame]:
+        anchors_lower = to_lower(collapse_whitespace(remove_whiteshape(anchors)))
+        blocks = [table.find_block(anchors_lower) for table in self.tables]
+        return [block for block in blocks if block is not None]
+
+    def find_labelled_block(self, labels: Mapping[str, Sequence[str]]) -> dict[str, Any]:
+        # Block of "label | value" rows anchored at the labels of the first key; rows are mapped to keys by labels
+        # Unknown labels are kept as they are, empty values are dropped
+        labels_lower = {key: to_lower(collapse_whitespace(remove_whiteshape(values))) for key, values in labels.items()}
+        blocks = self.find_blocks(next(iter(labels.values())))
+        result = {}
+        if len(blocks) == 0:
+            return result
+        for row in blocks[0].itertuples(index=False):
+            label = clean_value(row[0])
+            label_lower = to_lower(collapse_whitespace(remove_whiteshape([str(label)])))[0]
+            key = next((key for key, values in labels_lower.items() if label_lower in values), str(label))
+            values = [clean_value(x) for x in row[1:]]
+            values = [x for x in values if x is not None]
+            if len(values) > 0:
+                result[key] = values[0]
+        return result
 
     def find_rows(self, *args, **kwargs) -> list[pd.DataFrame]:
         dfs = []

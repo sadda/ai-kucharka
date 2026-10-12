@@ -15,3 +15,4 @@ from .data import (
     keyword_specimen,
     list_of_tests,
 )
+from .deniky import DenikyData, DenikyExcelFile
