@@ -1,0 +1,1332 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>AI Kuchařka</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#co-je-python-crawler" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="AI Kuchařka" class="md-header__button md-logo" aria-label="AI Kuchařka" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AI Kuchařka
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Documentation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/sadda/ai-kucharka" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ai-kucharka
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="AI Kuchařka" class="md-nav__button md-logo" aria-label="AI Kuchařka" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AI Kuchařka
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/sadda/ai-kucharka" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ai-kucharka
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#co-je-python-crawler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Co je Python Crawler
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jak-funguje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Jak funguje
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Jak funguje">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implementace-spolecnosti" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementace společnosti
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nacteni-a-extrakce-informaci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Načtení a extrakce informací
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vstupni-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vstupní data
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Vstupní data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#testovaci-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testovací data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#struktura-dokumentace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Struktura dokumentace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#podporovane-formaty" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Podporované formáty
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doporuceni" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doporučení
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spusteni" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spuštění
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Spuštění">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pozadavky" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Požadavky
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stazeni-projektu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stažení projektu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#virtualni-prostredi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Virtuální prostředí
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instalace-zavislosti" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instalace závislostí
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nastaveni-vstupnich-dat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nastavení vstupních dat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spusteni-crawleru" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spuštění crawleru
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spusteni-pomoci-powershellu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spuštění pomocí PowerShellu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doporuceny-postup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doporučený postup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reseni-beznych-problemu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Řešení běžných problémů
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vystupy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Výstupy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Výstupy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#soubory-pkl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Soubory .pkl
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#struktura-vystupu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Struktura výstupů
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tok-dat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tok dat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#k-cemu-se-pkl-soubory-pouzivaji" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        K čemu se .pkl soubory používají
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slozka-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Složka results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kontrola-vysledku" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kontrola výsledků
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pridani-nove-spolecnosti" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Přidání nové společnosti
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#co-je-python-crawler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Co je Python Crawler
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jak-funguje" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Jak funguje
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Jak funguje">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implementace-spolecnosti" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementace společnosti
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nacteni-a-extrakce-informaci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Načtení a extrakce informací
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vstupni-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vstupní data
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Vstupní data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#testovaci-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testovací data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#struktura-dokumentace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Struktura dokumentace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#podporovane-formaty" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Podporované formáty
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doporuceni" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doporučení
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spusteni" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spuštění
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Spuštění">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pozadavky" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Požadavky
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stazeni-projektu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stažení projektu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#virtualni-prostredi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Virtuální prostředí
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instalace-zavislosti" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instalace závislostí
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nastaveni-vstupnich-dat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nastavení vstupních dat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spusteni-crawleru" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spuštění crawleru
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spusteni-pomoci-powershellu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spuštění pomocí PowerShellu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doporuceny-postup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doporučený postup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reseni-beznych-problemu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Řešení běžných problémů
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vystupy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Výstupy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Výstupy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#soubory-pkl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Soubory .pkl
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#struktura-vystupu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Struktura výstupů
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tok-dat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tok dat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#k-cemu-se-pkl-soubory-pouzivaji" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        K čemu se .pkl soubory používají
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slozka-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Složka results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kontrola-vysledku" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kontrola výsledků
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pridani-nove-spolecnosti" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Přidání nové společnosti
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Documentation</h1>
+
+<h2 id="co-je-python-crawler">Co je Python Crawler</h2>
+<p>Python Crawler je aplikace určená k automatickému zpracování dokumentů uložených v připravených složkách.</p>
+<p>Crawler prochází jednotlivé složky, vyhledává podporované dokumenty a získává z nich předem definované informace. Výsledná data lze následně využít pro další zpracování, kontrolu nebo analýzu.</p>
+<p>Crawler je možné přizpůsobit různým společnostem a způsobům uložení dokumentace. Základní část systému zůstává společná a pro konkrétní společnost lze definovat vlastní způsob zpracování dokumentů a získávání požadovaných údajů.</p>
+<p>Crawler aktuálně pracuje s dokumenty Microsoft Word a Microsoft Excel.</p>
+<p>Podporované formáty jsou:</p>
+<ul>
+<li>Word: <code>.doc</code>, <code>.docx</code>, <code>.docm</code></li>
+<li>Excel: <code>.xls</code>, <code>.xlsx</code>, <code>.xlsm</code></li>
+</ul>
+<p>Starší formáty <code>.doc</code> a <code>.xls</code> jsou před dalším zpracováním automaticky převedeny do novějších formátů.</p>
+<p>Výsledkem zpracování jsou strukturovaná data uložená samostatně pro jednotlivé zpracovávané celky. Tyto výsledky lze následně načíst a dále analyzovat.</p>
+<h2 id="jak-funguje">Jak funguje</h2>
+<p>Crawler postupně prochází jednotlivé složky ve vstupním adresáři, vyhledává podporované dokumenty a z jejich obsahu získává požadované informace.</p>
+<p>Zpracování lze zjednodušeně popsat následovně:</p>
+<div class="highlight"><pre><span></span><code>Vstupní data
+    ↓
+Vyhledání dokumentů
+    ↓
+Načtení dokumentů
+    ↓
+Extrakce informací
+    ↓
+Uložení výsledků
+</code></pre></div>
+<h3 id="core">Core</h3>
+<p>Crawler je rozdělen na společnou část <code>Core</code> a implementaci pro konkrétní společnost.</p>
+<p><code>Core</code> obsahuje obecné funkce potřebné pro práci s dokumenty a daty. Zajišťuje například vyhledávání podporovaných souborů, jejich načtení a základní zpracování.</p>
+<p>Díky tomu není nutné vytvářet celý crawler znovu pro každou společnost.</p>
+<h3 id="implementace-spolecnosti">Implementace společnosti</h3>
+<p>Pro konkrétní společnost lze vytvořit vlastní implementaci navázanou na <code>Core</code>.</p>
+<p>Tato implementace určuje především:</p>
+<ul>
+<li>jaké dokumenty se mají zpracovávat,</li>
+<li>jaké informace se mají získávat,</li>
+<li>jakým způsobem se mají jednotlivé údaje vyhledávat,</li>
+<li>jaká pravidla se mají při zpracování použít.</li>
+</ul>
+<p>Jednodušší údaje lze vyhledávat pomocí předem definovaných klíčových slov. U složitějších údajů lze použít vlastní pravidla podle struktury dokumentu nebo tabulky.</p>
+<h3 id="nacteni-a-extrakce-informaci">Načtení a extrakce informací</h3>
+<p>Po nalezení dokumentů crawler načte jejich obsah a připraví jej pro další zpracování.</p>
+<p>U běžných údajů crawler vyhledává předem definovaná označení a následně získává odpovídající hodnoty.</p>
+<p>Například pokud dokument obsahuje tabulku:</p>
+<table>
+<thead>
+<tr>
+<th>Materiál</th>
+<th>1.2343</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>crawler může vyhledat označení <code>Materiál</code> a získat hodnotu <code>1.2343</code>.</p>
+<p>Jeden údaj může mít v různých dokumentech více označení. Například materiál může být uveden jako <code>Materiál</code> nebo <code>Material</code>. Pro jeden údaj proto může být definováno více možných klíčových slov.</p>
+<p>U složitějších údajů nemusí stačit pouze vyhledání názvu a hodnoty. V takovém případě lze použít specifická pravidla, která pracují například se strukturou tabulky.</p>
+<p>Po dokončení zpracování jsou získané informace uloženy jako výsledek pro daný zpracovávaný celek.</p>
+<p>Podrobnější informace o vstupních datech, výstupech a způsobu přizpůsobení crawleru pro další společnosti jsou uvedeny v dalších částech dokumentace.</p>
+<h2 id="vstupni-data">Vstupní data</h2>
+<p>Před spuštěním crawleru je potřeba připravit dokumenty, které mají být zpracovány, a určit jejich umístění.</p>
+<p>Vstupní cesta se nastavuje v souboru <code>convert.py</code> pomocí proměnné <code>root_input</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="n">root_input</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"C:\Python crawler - test"</span>
+</code></pre></div>
+<p>nebo</p>
+<div class="highlight"><pre><span></span><code><span class="n">root_input</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"D:\Firemni dokumentace"</span>
+</code></pre></div>
+<h3 id="testovaci-data">Testovací data</h3>
+<p>Před prvním použitím je doporučeno ověřit funkčnost crawleru na menším vzorku dat.</p>
+<div class="highlight"><pre><span></span><code>Python crawler - test/
+├── Nabidka_001/
+├── Nabidka_002/
+├── Zkouska_001/
+└── Projekt_001/
+</code></pre></div>
+<p>Pro testování by měly být použity pouze fiktivní dokumenty a údaje.</p>
+<h3 id="struktura-dokumentace">Struktura dokumentace</h3>
+<p>Každá hlavní složka představuje jeden zpracovávaný celek, například nabídku, objednávku, projekt nebo zkoušku.</p>
+<div class="highlight"><pre><span></span><code>Firemni dokumentace/
+├── Nabidka_001/
+├── Nabidka_002/
+├── Nabidka_003/
+└── Zkouska_001/
+</code></pre></div>
+<p>Dokumenty mohou být umístěny přímo ve složce nebo v jejích podsložkách.</p>
+<div class="highlight"><pre><span></span><code>Nabidka_001/
+├── Nabidka.docx
+├── Technicke_udaje.xlsx
+└── Prilohy/
+    ├── Specifikace.docx
+    └── Vysledky.xlsx
+</code></pre></div>
+<p>Crawler při vyhledávání prochází celou strukturu složky včetně podsložek.</p>
+<h3 id="podporovane-formaty">Podporované formáty</h3>
+<p>Word:</p>
+<ul>
+<li><code>.doc</code></li>
+<li><code>.docx</code></li>
+<li><code>.docm</code></li>
+</ul>
+<p>Excel:</p>
+<ul>
+<li><code>.xls</code></li>
+<li><code>.xlsx</code></li>
+<li><code>.xlsm</code></li>
+</ul>
+<p>Starší formáty <code>.doc</code> a <code>.xls</code> jsou před zpracováním automaticky převedeny do novějších formátů.</p>
+<h3 id="doporuceni">Doporučení</h3>
+<p>Crawler zpracovává všechny podporované dokumenty nalezené ve složce a jejích podsložkách.</p>
+<div class="highlight"><pre><span></span><code>Nabidka_001/
+├── Nabidka.docx
+├── Technicke_udaje.xlsx
+└── Archiv/
+    └── Stara_nabidka.docx
+</code></pre></div>
+<h2 id="spusteni">Spuštění</h2>
+<p>Crawler je určen pro běh v prostředí Windows a využívá Python. Pro správné spuštění je potřeba připravit Python prostředí, nainstalovat závislosti projektu a následně spustit hlavní skript.</p>
+<h3 id="pozadavky">Požadavky</h3>
+<p>Pro práci s crawlerem je potřeba:</p>
+<ul>
+<li>Windows</li>
+<li>Python</li>
+<li>Git</li>
+<li>Microsoft Word</li>
+<li>Microsoft Excel</li>
+<li>Visual Studio Code nebo jiný editor</li>
+<li>přístup k repozitáři crawleru</li>
+</ul>
+<p>Python je využíván jako hlavní runtime prostředí crawleru. Pro ověření dostupnosti Pythonu lze použít:</p>
+<div class="highlight"><pre><span></span><code><span class="n">python</span> <span class="p">-</span><span class="n">-version</span>
+</code></pre></div>
+<p>Pokud příkaz vrátí verzi Pythonu, je Python správně dostupný v systému.</p>
+<h3 id="stazeni-projektu">Stažení projektu</h3>
+<p>Projekt je uložen v Git repozitáři. Po naklonování repozitáře vznikne lokální kopie projektu, se kterou lze dále pracovat.</p>
+<p>Repozitář lze stáhnout například pomocí:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>&lt;adresa-repozitare&gt;
+</code></pre></div>
+<p>Po stažení projektu otevřete jeho kořenovou složku.</p>
+<h3 id="virtualni-prostredi">Virtuální prostředí</h3>
+<p>Pro crawler se používá samostatné Python virtuální prostředí <code>.venv</code>.</p>
+<p>Virtuální prostředí umožňuje oddělit Python závislosti crawleru od ostatních projektů a aplikací nainstalovaných v počítači.</p>
+<p>Vytvoření virtuálního prostředí:</p>
+<div class="highlight"><pre><span></span><code><span class="n">python</span> <span class="n">-m</span> <span class="n">venv</span> <span class="p">.</span><span class="n">venv</span>
+</code></pre></div>
+<p>Po vytvoření vznikne ve složce projektu adresář <code>.venv</code>.</p>
+<p>Virtuální prostředí je potřeba před spuštěním crawleru aktivovat:</p>
+<div class="highlight"><pre><span></span><code><span class="p">.\.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
+</code></pre></div>
+<p>Po úspěšné aktivaci se v terminálu obvykle zobrazí název prostředí:</p>
+<div class="highlight"><pre><span></span><code>(.venv) PS C:\...\comtes&gt;
+</code></pre></div>
+<p>Od této chvíle se Python a instalované balíčky používají z tohoto virtuálního prostředí.</p>
+<h3 id="instalace-zavislosti">Instalace závislostí</h3>
+<p>Projekt obsahuje soubor <code>pyproject.toml</code>, který slouží ke konfiguraci Python projektu a definici jeho závislostí.</p>
+<p>Po vytvoření a aktivaci virtuálního prostředí je potřeba nainstalovat závislosti požadované crawlerem.</p>
+<p>Konkrétní příkaz pro instalaci závislostí odpovídá způsobu, jakým je projekt nakonfigurován v <code>pyproject.toml</code>.</p>
+<h3 id="nastaveni-vstupnich-dat">Nastavení vstupních dat</h3>
+<p>Před spuštěním crawleru je potřeba připravit vstupní dokumenty.</p>
+<p>Umístění vstupních dat se nastavuje v souboru <code>convert.py</code> pomocí proměnné <code>root_input</code>.</p>
+<p>Podrobný popis struktury vstupních dat je uveden v kapitole <strong>Vstupní data</strong>.</p>
+<h3 id="spusteni-crawleru">Spuštění crawleru</h3>
+<p>Po aktivaci virtuálního prostředí a nastavení vstupních dat lze crawler spustit pomocí hlavního Python skriptu:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>convert.py
+</code></pre></div>
+<p>Crawler následně načte připravená vstupní data a zahájí jejich zpracování.</p>
+<h3 id="spusteni-pomoci-powershellu">Spuštění pomocí PowerShellu</h3>
+<p>Crawler lze spustit také pomocí připraveného PowerShell skriptu:</p>
+<div class="highlight"><pre><span></span><code><span class="p">.\</span><span class="n">convert</span><span class="p">.</span><span class="n">ps1</span>
+</code></pre></div>
+<p>PowerShell skript lze využít pro zjednodušení spuštění a automatizaci jednotlivých kroků potřebných pro běh crawleru.</p>
+<h3 id="doporuceny-postup">Doporučený postup</h3>
+<p>Při běžném spuštění crawleru postupujte následovně:</p>
+<ol>
+<li>Otevřete kořenovou složku projektu.</li>
+<li>Ověřte dostupnost Pythonu.</li>
+<li>Aktivujte virtuální prostředí <code>.venv</code>.</li>
+<li>Zkontrolujte nainstalované závislosti.</li>
+<li>Zkontrolujte nastavení <code>root_input</code>.</li>
+<li>Ověřte připravená vstupní data.</li>
+<li>Spusťte <code>convert.py</code> nebo <code>convert.ps1</code>.</li>
+<li>Po dokončení zkontrolujte vytvořené výstupy.</li>
+</ol>
+<h3 id="reseni-beznych-problemu">Řešení běžných problémů</h3>
+<p>Pokud nelze spustit příkaz <code>python</code>, ověřte, zda je Python správně nainstalován a dostupný v systémové proměnné <code>PATH</code>.</p>
+<p>Pokud nelze aktivovat virtuální prostředí, ověřte, zda byla složka <code>.venv</code> vytvořena a zda používáte PowerShell.</p>
+<p>Pokud crawler nenajde žádné dokumenty, zkontrolujte hodnotu <code>root_input</code> a strukturu vstupních složek podle kapitoly <strong>Vstupní data</strong>.</p>
+<p>Pokud při spuštění chybí některý Python modul, je pravděpodobné, že nejsou správně nainstalovány závislosti projektu nebo nebylo aktivováno virtuální prostředí.</p>
+<p>Pokud archivní dokumentace nemá být součástí zpracování, doporučuje se ji uložit mimo vstupní adresář crawleru.</p>
+<h2 id="vystupy">Výstupy</h2>
+<p>Po spuštění crawleru jsou zpracovaná data uložena do výstupních souborů. Výstupy slouží jako mezikrok mezi samotným zpracováním dokumentů a jejich následným načtením nebo analýzou.</p>
+<p>Hlavním výstupem crawleru jsou soubory ve formátu <code>.pkl</code>.</p>
+<h3 id="soubory-pkl">Soubory <code>.pkl</code></h3>
+<p>Soubor <code>.pkl</code> je binární soubor používaný Pythonem pro uložení zpracovaných dat.</p>
+<p>Crawler do těchto souborů ukládá informace získané ze vstupních dokumentů. Data jsou uložena ve strukturované podobě, aby s nimi bylo možné dále pracovat v Pythonu nebo v dalších částech projektu.</p>
+<p>Výsledný soubor může například obsahovat informace o:</p>
+<ul>
+<li>zpracovávaném dokumentu,</li>
+<li>zákazníkovi,</li>
+<li>zakázce,</li>
+<li>materiálu,</li>
+<li>chemickém složení,</li>
+<li>zkouškách,</li>
+<li>dalších údajích získaných ze vstupní dokumentace.</li>
+</ul>
+<p>Obsah výsledných dat závisí na konkrétní implementaci crawleru a na údajích, které jsou pro danou společnost definovány ke zpracování.</p>
+<h3 id="struktura-vystupu">Struktura výstupů</h3>
+<p>Výstupní soubory jsou vytvářeny samostatně pro jednotlivé zpracovávané celky.</p>
+<p>Výsledná struktura může například vypadat následovně:</p>
+<div class="highlight"><pre><span></span><code>results/
+├── Nabidka_001.pkl
+├── Nabidka_002.pkl
+├── Nabidka_003.pkl
+└── Zkouska_001.pkl
+</code></pre></div>
+<p>Každý <code>.pkl</code> soubor obsahuje data získaná ze vstupních dokumentů příslušného zpracovávaného celku.</p>
+<h3 id="tok-dat">Tok dat</h3>
+<div class="highlight"><pre><span></span><code>Word / Excel dokumenty
+          │
+          ▼
+       Crawler
+          │
+          ▼
+      .pkl soubor
+          │
+          ▼
+   analysis.ipynb
+</code></pre></div>
+<h3 id="k-cemu-se-pkl-soubory-pouzivaji">K čemu se <code>.pkl</code> soubory používají</h3>
+<p><code>.pkl</code> soubory slouží především k uložení výsledků crawleru pro další zpracování.</p>
+<p>Díky tomu není nutné při každé další analýze znovu procházet původní Word a Excel dokumenty. Výsledná data lze načíst přímo z již vytvořených <code>.pkl</code> souborů.</p>
+<p>Soubory lze následně využít například:</p>
+<ul>
+<li>pro kontrolu výsledků crawleru,</li>
+<li>pro další zpracování v Pythonu,</li>
+<li>pro analýzu dat,</li>
+<li>jako vstup pro notebooky uložené ve složce <code>notebooks</code>,</li>
+<li>pro další části projektu.</li>
+</ul>
+<h3 id="slozka-results">Složka <code>results</code></h3>
+<p>Výsledné soubory jsou ukládány do složky <code>results</code>.</p>
+<div class="highlight"><pre><span></span><code>results/
+├── Nabidka_001.pkl
+├── Nabidka_002.pkl
+└── Nabidka_003.pkl
+</code></pre></div>
+<p>Složka <code>results</code> tak obsahuje výstupy vytvořené crawlerem a může být použita jako zdroj dat pro následnou analýzu.</p>
+<h3 id="kontrola-vysledku">Kontrola výsledků</h3>
+<p>Po dokončení spuštění je doporučeno zkontrolovat složku <code>results</code> a ověřit, zda byly pro zpracovávané celky vytvořeny odpovídající výstupní soubory.</p>
+<p>Pokud některý očekávaný výstup chybí, je vhodné zkontrolovat průběh zpracování a případné chybové hlášky.</p>
+<h3 id="pridani-nove-spolecnosti">Přidání nové společnosti</h3>
+<p>•   vytvoření implementace 
+•   vlastní dokumenty 
+•   vlastní atributy 
+•   klíčová slova / pravidla </p>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<p>•   chybějící knihovny 
+•   špatná cesta 
+•   problémy s dokumenty 
+•   běžné chyby při spuštění </p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.sections", "content.code.copy"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
