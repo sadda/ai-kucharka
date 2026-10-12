@@ -77,6 +77,7 @@ job_number_drawing_labels = [
 heat_number_material_labels = [
     "Schmelzennummer / Werkstoff",
     "SchmelzeNo./Werkstoff",
+    "Werkstoff/Schmelzenummer",
 ]
 
 # NOVÉ – Varianta 3 (Pouze CZ)
@@ -184,12 +185,24 @@ test_tables = {
 }
 
 
+
 class CPFWordFile(WordFile):
     def get_cpf_header(self) -> dict[str, Any]:
+
+
+            
+
+        # ---------------------------------------------------------
+        # Základní atributy hlavičky
+        # ---------------------------------------------------------
         result = {
             key: self.find_values_next_to_labels(labels)
             for key, labels in header_labels.items()
         }
+
+        # Odstranění duplicitních hodnot test_code při zachování pořadí
+        if result.get("test_code"):
+            result["test_code"] = list(dict.fromkeys(result["test_code"]))
 
         result = {
             key: values
@@ -270,15 +283,23 @@ class CPFWordFile(WordFile):
             heat_number_material_labels
         )
 
-       
-
         if heat_number_material:
             for value in heat_number_material[:1]:
                 if " / " in value:
-                    heat_number, material = value.split(" / ", 1)
+                    first, second = value.split(" / ", 1)
 
-                    result["heat_number"] = [heat_number.strip()]
-                    result["material"] = [material.strip()]
+                    # Werkstoff/Schmelzennummer:
+                    # materiál / číslo tavby
+                    if self.find_values_next_to_labels(
+                        ["Werkstoff/Schmelzenummer"]
+                    ):
+                        result["material"] = [first.strip()]
+                        result["heat_number"] = [second.strip()]
+                    else:
+                        # Schmelzennummer / Werkstoff:
+                        # číslo tavby / materiál
+                        result["heat_number"] = [first.strip()]
+                        result["material"] = [second.strip()]
 
         job_number_material = self.find_values_next_to_labels(
             job_number_material_labels
@@ -335,9 +356,23 @@ class CPFWordFile(WordFile):
                         }
                     )
         if test_code_heat_number:
-            result["test_code_heat_number"] = test_code_heat_number            
+            # Odstranění duplicitních dvojic se zachováním pořadí
+            unique_items = []
+            seen = set()
 
-        return result    
+            for item in test_code_heat_number:
+                key = (
+                    item.get("test_code"),
+                    item.get("heat_number"),
+                )
+
+                if key not in seen:
+                    seen.add(key)
+                    unique_items.append(item)
+
+            result["test_code_heat_number"] = unique_items
+
+        return result 
 
 
     def get_cpf_customer_requirement(self) -> str | None:
@@ -358,16 +393,12 @@ class CPFWordFile(WordFile):
 
 
     def get_cpf_tests(self) -> dict[str, list[dict[str, str]]]:
-        for i, table in enumerate(self.tables):
-            print("TABLE", i)
-            print(table.table)
-
         tests = {}
 
         for name, (header_row, columns) in test_tables.items():
 
             # ---------------------------------------------------------
-            # HARDNESS — beze změny
+            # HARDNESS
             # ---------------------------------------------------------
             if name == "hardness":
                 hardness_table = None
