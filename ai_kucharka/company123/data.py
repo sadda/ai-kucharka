@@ -18,4 +18,4 @@ class Company123Data(Data):
 
     def extract_file_information(self, file: ExcelFile | WordFile) -> None:
         for attribute in ATTRIBUTES:
-            self.info[attribute] = self.info[attribute] + [InfoStr(x, file.name) for x in file.get_info([attribute])]
+            self.info[attribute] = self.info[attribute] + [InfoStr(x, file.name) for x in file.find_values_next_to_labels([attribute])]

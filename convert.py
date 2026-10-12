@@ -38,6 +38,7 @@ root_input = config["root_input"]
 root_output = config["root_output"]
 auxiliary_folder = config["auxiliary_folder"]
 orders_skip = config.get("orders_skip", [])
+overwrite = config.get("overwrite", False)
 
 stdout = cast(io.TextIOWrapper, sys.stdout)
 stdout.reconfigure(encoding="utf-8")
@@ -58,7 +59,7 @@ for order_name in tqdm(order_names):
         continue
     root = f"{root_input}/{order_name}"
     result_name = f"{root_output}/{order_name}.pkl"
-    if os.path.exists(result_name):
+    if os.path.exists(result_name) and not overwrite:
         data = DataClass.load(result_name, logger)
     else:
         data = DataClass(root, order_name, logger)

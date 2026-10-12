@@ -17,6 +17,7 @@ from docx import Document
 from numpy.typing import ArrayLike
 
 from ..utils import (
+    collapse_whitespace,
     find_excel_files,
     find_word_files,
     remove_whiteshape,
@@ -82,27 +83,59 @@ class InfoComposition(Info):
     source: str
 
 
+def to_python_str(x: Any) -> Any:
+    return str(x) if isinstance(x, str) else x
+
+
 class Table:
     def __init__(self, table: ArrayLike) -> None:
 
-        table = np.asarray(table)
+        table = np.asarray(table, dtype=object)
         if table.ndim == 1:
             table = table.reshape(1, -1)
 
         self.table = remove_whiteshape(table)
-        self.table_lower = to_lower(self.table)
+        self.table_lower = to_lower(collapse_whitespace(self.table))
 
-    def get_info(self, keywords: Sequence[str]) -> list[str]:
+    def find_values_next_to_labels(self, keywords: Sequence[str], adjacent: bool = True) -> list[str]:
+        # adjacent=True: value is the cell right of the keyword
+        # adjacent=False: value is the first cell right of the keyword which is not NaN (empty Excel cells are NaN)
+        # Empty values are not returned
         idx = np.isin(self.table_lower, keywords)
         ii, jj = np.where(idx)
         info = []
         for i, j in zip(ii, jj):
             # TODO: add merged cells
             row = self.table[i, j + 1 :]
-            row = row[~pd.isnull(row)]
-            if len(row) > 0:
-                info.append(row[0])
+            if adjacent:
+                row = row[:1]
+            row = [x for x in row if not pd.isnull(x)]
+            if len(row) > 0 and row[0] != "":
+                info.append(to_python_str(row[0]))
         return info
+
+    def find_rows(self, columns: Sequence[str | tuple[str, ...]], header_row: int, skip_rows: int = 0) -> pd.DataFrame | None:
+        # Columns are found in the header row, skip_rows rows below it are skipped (such as units); a tuple lists alternative column names
+        if header_row >= len(self.table):
+            return None
+        idx = self._find_columns(header_row, columns)
+        if idx is None:
+            return None
+        rows = [[to_python_str(x) for x in row[idx]] for row in self.table[header_row + 1 + skip_rows :] if not pd.isnull(row[idx[0]]) and row[idx[0]] != ""]
+        return pd.DataFrame(rows, columns=self.table[header_row, idx])
+
+    def _find_columns(self, row: int, columns: Sequence[str | tuple[str, ...]]) -> list[int] | None:
+        header = list(self.table_lower[row])
+        idx = []
+        for column in columns:
+            names = column if isinstance(column, tuple) else (column,)
+            names = to_lower(collapse_whitespace(remove_whiteshape(list(names))))
+            # Index of the first name found in the header
+            found = [header.index(name) for name in names if name in header]
+            if len(found) == 0:
+                return None
+            idx.append(found[0])
+        return idx
 
 
 class File(ABC):
@@ -130,12 +163,20 @@ class File(ABC):
     def _load_tables(self) -> list[Table]:
         pass
 
-    def get_info(self, keywords: Sequence[str]) -> list[str]:
-        keywords_lower = to_lower(remove_whiteshape(keywords))
+    def find_values_next_to_labels(self, keywords: Sequence[str], adjacent: bool = True) -> list[str]:
+        keywords_lower = to_lower(collapse_whitespace(remove_whiteshape(keywords)))
         info = []
         for table in self.tables:
-            info = info + table.get_info(keywords_lower)
+            info = info + table.find_values_next_to_labels(keywords_lower, adjacent=adjacent)
         return info
+
+    def find_rows(self, *args, **kwargs) -> list[pd.DataFrame]:
+        dfs = []
+        for table in self.tables:
+            df = table.find_rows(*args, **kwargs)
+            if df is not None:
+                dfs.append(df)
+        return dfs
 
 
 class WordFile(File):
@@ -146,6 +187,26 @@ class WordFile(File):
         except Exception:
             self.logger.warning("Unreadable file", extra={"file": self.name, "type": "unreadable_file"})
             self.file = None
+
+    def get_paragraphs(self) -> list[str]:
+        if self.file is None:
+            return []
+        return [paragraph.text.strip() for paragraph in self.file.paragraphs if paragraph.text.strip()]
+
+    def find_labelled_paragraphs(self, labels: dict[str, Sequence[str]], separator: str = ":") -> list[tuple[str, str]]:
+        # Paragraphs "label: value" in document order as (key, value) for labels matching labels[key]
+        labels_lower = {key: to_lower(collapse_whitespace(remove_whiteshape(values))) for key, values in labels.items()}
+        result = []
+        for text in self.get_paragraphs():
+            if separator not in text:
+                continue
+            label, value = text.split(separator, 1)
+            label = to_lower(collapse_whitespace(remove_whiteshape([label])))[0]
+            for key, values in labels_lower.items():
+                if label in values:
+                    result.append((key, value.strip()))
+                    break
+        return result
 
     def _load_tables(self) -> list[Table]:
         tables = []
