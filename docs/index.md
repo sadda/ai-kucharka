@@ -1,4 +1,4 @@
-## Co je Python Crawler Majsneros bejros
+## Co je Python Crawler
 
 Python Crawler je aplikace určená k automatickému zpracování dokumentů uložených v připravených složkách.
 
