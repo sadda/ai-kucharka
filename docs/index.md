@@ -329,6 +329,24 @@ root_input = "C:/Crawler/Vstupni_data"
 
 Cesta musí směřovat na existující složku obsahující dokumenty určené ke zpracování.
 
+### Nesprávný zápis cesty
+
+Pokud crawler vstupní data nenajde, zkontrolujte také způsob zápisu cesty.
+
+Doporučuje se používat dopředná lomítka `/`:
+
+```toml
+root_input = "C:/Crawler/Vstupni_data"
+```
+
+Pozor na zpětná lomítka `\`, která mohou způsobit problémy při zápisu cesty.
+
+Stejný způsob zápisu lze použít také pro výstupní cestu:
+
+```toml
+root_output = "C:/Crawler/results"
+```
+
 ### Nesprávná struktura vstupních dat
 
 Jednotlivé zpracovávané celky musí být umístěny v samostatných složkách ve vstupním adresáři.
