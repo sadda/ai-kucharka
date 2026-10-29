@@ -1,4 +1,4 @@
-# AI Kuchařkaa
+# AI Kuchařka
 
 [![CI](https://github.com/sadda/ai-kucharka/actions/workflows/ci.yml/badge.svg)](https://github.com/sadda/ai-kucharka/actions/workflows/ci.yml)
 
