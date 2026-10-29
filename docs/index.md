@@ -1,387 +1,376 @@
-## Co je Python Crawler
+# Python Crawler
 
-Python Crawler je aplikace určená k automatickému zpracování dokumentů uložených v připravených složkách.
+## 1. Co je Python Crawler
 
-Crawler prochází jednotlivé složky, vyhledává podporované dokumenty a získává z nich předem definované informace. Výsledná data lze následně využít pro další zpracování, kontrolu nebo analýzu.
+Python Crawler je nástroj pro automatické zpracování dokumentů. Prochází připravené složky, vyhledává podporované dokumenty a získává z nich předem definované informace.
 
-Crawler je možné přizpůsobit různým společnostem a způsobům uložení dokumentace. Základní část systému zůstává společná a pro konkrétní společnost lze definovat vlastní způsob zpracování dokumentů a získávání požadovaných údajů.
+Crawler lze přizpůsobit různým typům dokumentace a způsobům zpracování. Společná část systému zůstává zachována a konkrétní pravidla lze definovat podle daného použití.
 
-Crawler aktuálně pracuje s dokumenty Microsoft Word a Microsoft Excel.
+Výsledkem jsou strukturovaná data, která lze dále kontrolovat, zpracovávat nebo analyzovat.
 
-Podporované formáty jsou:
+---
 
-- Word: `.doc`, `.docx`, `.docm`
-- Excel: `.xls`, `.xlsx`, `.xlsm`
+## 2. Jak crawler funguje
 
-Starší formáty `.doc` a `.xls` jsou před dalším zpracováním automaticky převedeny do novějších formátů.
+Crawler dostane jako vstup složku s dokumenty. Složka může obsahovat další podsložky a dokumenty mohou být uložené v různých úrovních této struktury.
 
-Výsledkem zpracování jsou strukturovaná data uložená samostatně pro jednotlivé zpracovávané celky. Tyto výsledky lze následně načíst a dále analyzovat.
+Crawler složky postupně prochází, vyhledává podporované dokumenty a získává z nich požadované informace.
 
-## Jak funguje
+Výsledek zpracování je uložen do souborů `.pkl` (Pickle). Ty slouží pro uložení zpracovaných dat a nejsou určené k běžnému ručnímu čtení.
 
-Crawler postupně prochází jednotlivé složky ve vstupním adresáři, vyhledává podporované dokumenty a z jejich obsahu získává požadované informace.
-
-Zpracování lze zjednodušeně popsat následovně:
+Pro kontrolu a další práci s výsledky slouží `analysis.ipynb`, pomocí kterého lze obsah `.pkl` souborů načíst a zobrazit v přehledné podobě.
 
 ```text
-Vstupní data
-    ↓
-Vyhledání dokumentů
-    ↓
+Složka s dokumenty
+        ↓
+Procházení složek a podsložek
+        ↓
 Načtení dokumentů
-    ↓
-Extrakce informací
-    ↓
-Uložení výsledků
+        ↓
+Získání požadovaných dat
+        ↓
+.pkl
+        ↓
+analysis.ipynb
+        ↓
+Zobrazení výsledků
 ```
+
+<!-- OBRÁZEK: Jednoduché schéma průchodu dat crawlerem -->
+
+---
+
+## 3. Architektura: Core a specializované implementace
+
+Crawler je rozdělen na společnou část `Core` a specializované implementace pro konkrétní typ dokumentace.
 
 ### Core
 
-Crawler je rozdělen na společnou část `Core` a implementaci pro konkrétní společnost.
+`Core` obsahuje společnou logiku crawleru. Díky tomu není potřeba vytvářet celý crawler znovu pro každé nové použití.
 
-`Core` obsahuje obecné funkce potřebné pro práci s dokumenty a daty. Zajišťuje například vyhledávání podporovaných souborů, jejich načtení a základní zpracování.
+### Specializované implementace
 
-Díky tomu není nutné vytvářet celý crawler znovu pro každou společnost.
+Na `Core` navazují jednotlivé implementace, například:
 
-### Implementace společnosti
+- `COMTES`
+- `CPF`
 
-Pro konkrétní společnost lze vytvořit vlastní implementaci navázanou na `Core`.
+Ty určují, **co se má v dokumentech hledat a jak se mají nalezené informace zpracovat**.
 
-Tato implementace určuje především:
-
-- jaké dokumenty se mají zpracovávat,
-- jaké informace se mají získávat,
-- jakým způsobem se mají jednotlivé údaje vyhledávat,
-- jaká pravidla se mají při zpracování použít.
-
-Jednodušší údaje lze vyhledávat pomocí předem definovaných klíčových slov. U složitějších údajů lze použít vlastní pravidla podle struktury dokumentu nebo tabulky.
-
-### Načtení a extrakce informací
-
-Po nalezení dokumentů crawler načte jejich obsah a připraví jej pro další zpracování.
-
-U běžných údajů crawler vyhledává předem definovaná označení a následně získává odpovídající hodnoty.
-
-Například pokud dokument obsahuje tabulku:
-
-| Materiál | 1.2343 |
-|-----------|---------|
-
-crawler může vyhledat označení `Materiál` a získat hodnotu `1.2343`.
-
-Jeden údaj může mít v různých dokumentech více označení. Například materiál může být uveden jako `Materiál` nebo `Material`. Pro jeden údaj proto může být definováno více možných klíčových slov.
-
-U složitějších údajů nemusí stačit pouze vyhledání názvu a hodnoty. V takovém případě lze použít specifická pravidla, která pracují například se strukturou tabulky.
-
-Po dokončení zpracování jsou získané informace uloženy jako výsledek pro daný zpracovávaný celek.
-
-Podrobnější informace o vstupních datech, výstupech a způsobu přizpůsobení crawleru pro další společnosti jsou uvedeny v dalších částech dokumentace.
-
-## Vstupní data
-
-Před spuštěním crawleru je potřeba připravit dokumenty, které mají být zpracovány, a určit jejich umístění.
-
-Vstupní cesta se nastavuje v souboru `convert.py` pomocí proměnné `root_input`.
-
-```python
-root_input = r"C:\Python crawler - test"
-```
-
-nebo
-
-```python
-root_input = r"D:\Firemni dokumentace"
-```
-
-### Testovací data
-
-Před prvním použitím je doporučeno ověřit funkčnost crawleru na menším vzorku dat.
+Zjednodušeně:
 
 ```text
-Python crawler - test/
-├── Nabidka_001/
-├── Nabidka_002/
-├── Zkouska_001/
-└── Projekt_001/
+              Core
+                │
+        ┌───────┴───────┐
+        ▼               ▼
+     COMTES             CPF
+        │               │
+        ▼               ▼
+ vlastní pravidla   vlastní pravidla
 ```
 
-Pro testování by měly být použity pouze fiktivní dokumenty a údaje.
+<!-- OBRÁZEK: Architektura Core → COMTES / CPF -->
 
-### Struktura dokumentace
+---
 
-Každá hlavní složka představuje jeden zpracovávaný celek, například nabídku, objednávku, projekt nebo zkoušku.
-
-```text
-Firemni dokumentace/
-├── Nabidka_001/
-├── Nabidka_002/
-├── Nabidka_003/
-└── Zkouska_001/
-```
-
-Dokumenty mohou být umístěny přímo ve složce nebo v jejích podsložkách.
-
-```text
-Nabidka_001/
-├── Nabidka.docx
-├── Technicke_udaje.xlsx
-└── Prilohy/
-    ├── Specifikace.docx
-    └── Vysledky.xlsx
-```
-
-Crawler při vyhledávání prochází celou strukturu složky včetně podsložek.
-
-### Podporované formáty
-
-Word:
-
-- `.doc`
-- `.docx`
-- `.docm`
-
-Excel:
-
-- `.xls`
-- `.xlsx`
-- `.xlsm`
-
-Starší formáty `.doc` a `.xls` jsou před zpracováním automaticky převedeny do novějších formátů.
-
-### Doporučení
-
-Crawler zpracovává všechny podporované dokumenty nalezené ve složce a jejích podsložkách.
-
-```text
-Nabidka_001/
-├── Nabidka.docx
-├── Technicke_udaje.xlsx
-└── Archiv/
-    └── Stara_nabidka.docx
-```
-
-
-## Spuštění
-
-Crawler je určen pro běh v prostředí Windows a využívá Python. Pro správné spuštění je potřeba připravit Python prostředí, nainstalovat závislosti projektu a následně spustit hlavní skript.
-
-### Požadavky
+## 4. Co potřebuji před spuštěním
 
 Pro práci s crawlerem je potřeba:
 
-- Windows
-- Python
-- Git
-- Microsoft Word
-- Microsoft Excel
-- Visual Studio Code nebo jiný editor
-- přístup k repozitáři crawleru
+- **Python**
+- **Git**
+- **Visual Studio Code** nebo jiný editor
+- přístup k repozitáři [AI Kuchařka](https://github.com/sadda/ai-kucharka)
+- závislosti potřebné pro běh projektu
 
-Python je využíván jako hlavní runtime prostředí crawleru. Pro ověření dostupnosti Pythonu lze použít:
+Potřebné Python knihovny jsou definované přímo v projektu pomocí souboru `pyproject.toml`.
 
-```powershell
-python --version
-```
+---
 
-Pokud příkaz vrátí verzi Pythonu, je Python správně dostupný v systému.
+## 5. Instalace krok za krokem
 
 ### Stažení projektu
 
-Projekt je uložen v Git repozitáři. Po naklonování repozitáře vznikne lokální kopie projektu, se kterou lze dále pracovat.
-
-Repozitář lze stáhnout například pomocí:
+Nejprve naklonujte repozitář:
 
 ```bash
 git clone <adresa-repozitare>
 ```
 
-Po stažení projektu otevřete jeho kořenovou složku.
+Poté otevřete staženou složku projektu například ve Visual Studio Code.
 
-### Virtuální prostředí
+<!-- OBRÁZEK: Otevřený projekt AI Kuchařka ve Visual Studio Code -->
 
-Pro crawler se používá samostatné Python virtuální prostředí `.venv`.
+### Vytvoření virtuálního prostředí
 
-Virtuální prostředí umožňuje oddělit Python závislosti crawleru od ostatních projektů a aplikací nainstalovaných v počítači.
+Crawler vyžaduje **Python 3.11 nebo novější**.
 
-Vytvoření virtuálního prostředí:
+Doporučuje se vytvořit samostatné virtuální prostředí:
 
-```powershell
+```bash
 python -m venv .venv
 ```
 
-Po vytvoření vznikne ve složce projektu adresář `.venv`.
+### Aktivace virtuálního prostředí
 
-Virtuální prostředí je potřeba před spuštěním crawleru aktivovat:
+Na Windows:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-Po úspěšné aktivaci se v terminálu obvykle zobrazí název prostředí:
+Na Linuxu:
 
-```text
-(.venv) PS C:\...\comtes>
+```bash
+source .venv/bin/activate
 ```
 
-Od této chvíle se Python a instalované balíčky používají z tohoto virtuálního prostředí.
+### Instalace knihoven
 
-### Instalace závislostí
+Potřebné knihovny jsou definované v souboru `pyproject.toml`.
 
-Projekt obsahuje soubor `pyproject.toml`, který slouží ke konfiguraci Python projektu a definici jeho závislostí.
+Po aktivaci virtuálního prostředí je lze nainstalovat společně s projektem:
 
-Po vytvoření a aktivaci virtuálního prostředí je potřeba nainstalovat závislosti požadované crawlerem.
+```bash
+pip install -e .
+```
 
-Konkrétní příkaz pro instalaci závislostí odpovídá způsobu, jakým je projekt nakonfigurován v `pyproject.toml`.
+Mezi používané knihovny patří například `pandas`, `numpy`, `openpyxl`, `python-docx`, `tqdm` a `xlrd`.
 
-### Nastavení vstupních dat
+Tím je základní prostředí crawleru připravené.
 
-Před spuštěním crawleru je potřeba připravit vstupní dokumenty.
+---
 
-Umístění vstupních dat se nastavuje v souboru `convert.py` pomocí proměnné `root_input`.
+## 6. Konfigurace a příprava vstupních dat
 
-Podrobný popis struktury vstupních dat je uveden v kapitole **Vstupní data**.
+Nastavení crawleru je uloženo v konfiguračním souboru:
 
-### Spuštění crawleru
+```text
+configs/company123.toml
+```
 
-Po aktivaci virtuálního prostředí a nastavení vstupních dat lze crawler spustit pomocí hlavního Python skriptu:
+Pro základní použití jsou důležité především tři hodnoty:
+
+```toml
+data_class = "..."
+root_input = "C:/Crawler/Vstupni_data"
+root_output = "results/Company123"
+```
+
+- `data_class` – určuje, **která implementace crawleru se použije** a podle jakých pravidel budou dokumenty zpracovány.
+- `root_input` – cesta k hlavní složce obsahující vstupní Word a Excel dokumenty.
+- `root_output` – umístění, kam crawler uloží výsledné `.pkl` soubory.
+
+<!-- OBRÁZEK: Ukázka konfiguračního souboru company123.toml -->
+
+### Vstupní data
+
+Do složky nastavené pomocí `root_input` se uloží dokumenty určené ke zpracování. Crawler prochází také vnořené podsložky.
+
+Například:
+
+```text
+Vstupni_data/
+├── Zakazka_001/
+│   ├── Nabidka.docx
+│   └── Parametry.xlsx
+│
+├── Zakazka_002/
+│   └── Dokumentace/
+│       ├── Specifikace.docx
+│       └── Vysledky.xlsx
+│
+└── Zakazka_003/
+    └── Nabidka.docx
+```
+
+Konkrétní informace, které crawler z těchto dokumentů získává, závisejí na implementaci nastavené pomocí `data_class`.
+
+<!-- OBRÁZEK: Příklad adresářové struktury vstupních dat -->
+
+---
+
+## 7. První spuštění crawleru
+
+Crawler se spouští pomocí souboru `convert.py`. Spuštění je možné přímo z editoru nebo pomocí terminálu.
+
+### Spuštění z editoru
+
+Ve Visual Studio Code otevřete soubor `convert.py` a spusťte jej pomocí tlačítka **Run / Play**.
+
+Při spuštění bez dalších parametrů se použije výchozí konfigurace:
+
+```text
+configs/company123.toml
+```
+
+### Spuštění z terminálu
+
+Crawler lze spustit také z terminálu v kořenové složce projektu:
 
 ```bash
 python convert.py
 ```
 
-Crawler následně načte připravená vstupní data a zahájí jejich zpracování.
+Pro použití jiného konfiguračního souboru:
 
-### Spuštění pomocí PowerShellu
-
-Crawler lze spustit také pomocí připraveného PowerShell skriptu:
-
-```powershell
-.\convert.ps1
+```bash
+python convert.py --config configs/moje.local.toml
 ```
 
-PowerShell skript lze využít pro zjednodušení spuštění a automatizaci jednotlivých kroků potřebných pro běh crawleru.
+### Spuštění vybraných složek
 
-### Doporučený postup
+Pokud chcete zpracovat pouze vybrané složky ze vstupního adresáře, uveďte jejich názvy za příkazem:
 
-Při běžném spuštění crawleru postupujte následovně:
+```bash
+python convert.py Zakazka_001 Zakazka_002
+```
 
-1. Otevřete kořenovou složku projektu.
-2. Ověřte dostupnost Pythonu.
-3. Aktivujte virtuální prostředí `.venv`.
-4. Zkontrolujte nainstalované závislosti.
-5. Zkontrolujte nastavení `root_input`.
-6. Ověřte připravená vstupní data.
-7. Spusťte `convert.py` nebo `convert.ps1`.
-8. Po dokončení zkontrolujte vytvořené výstupy.
+Pokud žádné názvy neuvedete, crawler zpracuje všechny položky ve složce nastavené pomocí `root_input`.
 
-### Řešení běžných problémů
+### Průběh zpracování
 
-Pokud nelze spustit příkaz `python`, ověřte, zda je Python správně nainstalován a dostupný v systémové proměnné `PATH`.
+Během spuštění se v terminálu zobrazují názvy právě zpracovávaných složek a celkový průběh.
 
-Pokud nelze aktivovat virtuální prostředí, ověřte, zda byla složka `.venv` vytvořena a zda používáte PowerShell.
+<!-- OBRÁZEK: Screenshot úspěšného spuštění crawleru ve VS Code -->
 
-Pokud crawler nenajde žádné dokumenty, zkontrolujte hodnotu `root_input` a strukturu vstupních složek podle kapitoly **Vstupní data**.
+*Příklad úspěšného spuštění crawleru. Hodnota `100 %` znamená, že byly zpracovány všechny nalezené položky.*
 
-Pokud při spuštění chybí některý Python modul, je pravděpodobné, že nejsou správně nainstalovány závislosti projektu nebo nebylo aktivováno virtuální prostředí.
+Po dokončení jsou výsledné `.pkl` soubory uloženy do složky nastavené pomocí `root_output`.
 
-Pokud archivní dokumentace nemá být součástí zpracování, doporučuje se ji uložit mimo vstupní adresář crawleru.
+### Kontrola po spuštění
 
-## Výstupy
+Po dokončení zkontrolujte:
 
-Po spuštění crawleru jsou zpracovaná data uložena do výstupních souborů. Výstupy slouží jako mezikrok mezi samotným zpracováním dokumentů a jejich následným načtením nebo analýzou.
+- zda průběh dosáhl hodnoty `100 %`,
+- zda se v terminálu neobjevila chyba,
+- zda byly ve výstupní složce vytvořeny očekávané `.pkl` soubory.
 
-Hlavním výstupem crawleru jsou soubory ve formátu `.pkl`.
+---
 
-### Soubory `.pkl`
+## 8. Výstupy a jejich použití
 
-Soubor `.pkl` je binární soubor používaný Pythonem pro uložení zpracovaných dat.
+Po dokončení zpracování jsou výsledky uloženy do složky nastavené pomocí `root_output`.
 
-Crawler do těchto souborů ukládá informace získané ze vstupních dokumentů. Data jsou uložena ve strukturované podobě, aby s nimi bylo možné dále pracovat v Pythonu nebo v dalších částech projektu.
+Pro každý zpracovaný celek vzniká samostatný soubor `.pkl`.
 
-Výsledný soubor může například obsahovat informace o:
-
-- zpracovávaném dokumentu,
-- zákazníkovi,
-- zakázce,
-- materiálu,
-- chemickém složení,
-- zkouškách,
-- dalších údajích získaných ze vstupní dokumentace.
-
-Obsah výsledných dat závisí na konkrétní implementaci crawleru a na údajích, které jsou pro danou společnost definovány ke zpracování.
-
-### Struktura výstupů
-
-Výstupní soubory jsou vytvářeny samostatně pro jednotlivé zpracovávané celky.
-
-Výsledná struktura může například vypadat následovně:
+Například:
 
 ```text
 results/
-├── Nabidka_001.pkl
-├── Nabidka_002.pkl
-├── Nabidka_003.pkl
-└── Zkouska_001.pkl
+└── Company123/
+    ├── Zakazka001.pkl
+    ├── Zakazka002.pkl
+    └── Zakazka003.pkl
 ```
 
-Každý `.pkl` soubor obsahuje data získaná ze vstupních dokumentů příslušného zpracovávaného celku.
+<!-- OBRÁZEK: Složka results s vytvořenými .pkl soubory -->
 
-### Tok dat
+### Co je `.pkl`
+
+`.pkl` (Pickle) je formát používaný Pythonem pro ukládání dat. Výsledné soubory nejsou určené k běžnému ručnímu čtení.
+
+Pro další práci s výsledky slouží notebook:
 
 ```text
-Word / Excel dokumenty
-          │
-          ▼
-       Crawler
-          │
-          ▼
-      .pkl soubor
-          │
-          ▼
-   analysis.ipynb
+notebooks/analysis.ipynb
 ```
 
-### K čemu se `.pkl` soubory používají
+`analysis.ipynb` načítá vytvořené `.pkl` soubory a umožňuje získaná data dále zpracovat, kontrolovat, analyzovat a zobrazit v přehlednější podobě.
 
-`.pkl` soubory slouží především k uložení výsledků crawleru pro další zpracování.
+Výsledná data lze podle potřeby připravit také pro další použití, například export do Excelu.
 
-Díky tomu není nutné při každé další analýze znovu procházet původní Word a Excel dokumenty. Výsledná data lze načíst přímo z již vytvořených `.pkl` souborů.
-
-Soubory lze následně využít například:
-
-- pro kontrolu výsledků crawleru,
-- pro další zpracování v Pythonu,
-- pro analýzu dat,
-- jako vstup pro notebooky uložené ve složce `notebooks`,
-- pro další části projektu.
-
-### Složka `results`
-
-Výsledné soubory jsou ukládány do složky `results`.
+Celý proces lze zjednodušeně znázornit:
 
 ```text
-results/
-├── Nabidka_001.pkl
-├── Nabidka_002.pkl
-└── Nabidka_003.pkl
+Word / Excel
+      ↓
+   Crawler
+      ↓
+    .pkl
+      ↓
+analysis.ipynb
+      ↓
+Zpracování a analýza výsledků
 ```
 
-Složka `results` tak obsahuje výstupy vytvořené crawlerem a může být použita jako zdroj dat pro následnou analýzu.
+### Kontrola výstupů
 
-### Kontrola výsledků
+Po dokončení crawleru stačí zkontrolovat výstupní složku a ověřit, že pro očekávané položky vznikly odpovídající `.pkl` soubory.
 
-Po dokončení spuštění je doporučeno zkontrolovat složku `results` a ověřit, zda byly pro zpracovávané celky vytvořeny odpovídající výstupní soubory.
+### Analýza výsledků
 
-Pokud některý očekávaný výstup chybí, je vhodné zkontrolovat průběh zpracování a případné chybové hlášky.
+Pro podrobnější kontrolu a další zpracování se otevře `analysis.ipynb`.
 
+Notebook pracuje s vytvořenými `.pkl` soubory a převádí jejich obsah do podoby vhodné pro další práci s daty.
 
-### Přidání nové společnosti
-•	vytvoření implementace 
-•	vlastní dokumenty 
-•	vlastní atributy 
-•	klíčová slova / pravidla 
-### Troubleshooting
-•	chybějící knihovny 
-•	špatná cesta 
-•	problémy s dokumenty 
-•	běžné chyby při spuštění 
+<!-- OBRÁZEK: Screenshot otevřeného analysis.ipynb a zobrazených výsledků -->
+
+---
+
+## 9. Nejčastější problémy a jejich řešení
+
+### Crawler se nespustí
+
+Ověřte, že je aktivní správné Python prostředí a jsou nainstalované potřebné knihovny.
+
+```bash
+pip install -e .
+```
+
+### Crawler nenajde vstupní data
+
+Zkontrolujte cestu ke vstupním datům `root_input` v konfiguračním souboru.
+
+```toml
+root_input = "C:/Crawler/Vstupni_data"
+```
+
+Cesta musí směřovat na existující složku obsahující dokumenty určené ke zpracování.
+
+### Nesprávná struktura vstupních dat
+
+Jednotlivé zpracovávané celky musí být umístěny v samostatných složkách ve vstupním adresáři.
+
+Například:
+
+```text
+Vstupni_data/
+├── Nabidka_001/
+│   ├── Nabidka.docx
+│   └── Parametry.xlsx
+├── Nabidka_002/
+│   └── Nabidka.docx
+└── Nabidka_003/
+    └── Dokumentace/
+        └── Parametry.xlsx
+```
+
+Dokumenty mohou být umístěny také ve vnořených podsložkách.
+
+### Nevznikl očekávaný výstup
+
+Zkontrolujte průběh crawleru v terminálu a cestu k výstupním datům `root_output`.
+
+```toml
+root_output = "results/Company123"
+```
+
+Ve výstupní složce by po úspěšném zpracování měly vzniknout odpovídající `.pkl` soubory.
+
+### Data se nezpracovala znovu
+
+Pokud již pro danou položku existuje `.pkl` soubor, crawler standardně použije existující výsledek.
+
+Pro nové zpracování lze v konfiguraci nastavit:
+
+```toml
+overwrite = true
+```
+
+### Použita nesprávná implementace
+
+Zkontrolujte hodnotu `data_class` v konfiguračním souboru.
+
+`data_class` určuje implementaci a tím pravidla, podle kterých crawler dokumenty zpracovává.
